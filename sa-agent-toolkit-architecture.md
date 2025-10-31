@@ -172,9 +172,9 @@ interview_templates:
     
   compliance_requirements: |
     Regarding compliance and regulations:
-    1. What regulatory frameworks apply? (GDPR, PCI-DSS, etc.)
+    1. What regulatory frameworks apply? (GDPR, PCI-DSS, SOC2, etc.)
     2. What are the data residency requirements?
-    3. Are there industry-specific standards? (IATA, CAA for aviation)
+    3. Are there industry-specific standards?
     4. What are the audit requirements?
 ```
 
@@ -195,15 +195,15 @@ agent: json-generator-agent
 version: 1.0.0
 
 context_template: |
-  You are a specialized agent for generating C4 model JSON according to British Airways architectural standards.
-  
+  You are a specialized agent for generating C4 model JSON according to enterprise architectural standards.
+
   Rules:
   1. Use proper ID format: {LEVEL}-{DOMAIN}-{SEQ}
   2. Maintain hierarchical relationships
   3. Apply criticality classifications (CS1, CS2, SL1, SL2, STANDARD)
   4. Include all required fields per level
-  5. Validate against BA C4 schema v1.1
-  
+  5. Validate against C4 JSON schema v1.1
+
   For external systems:
   - Classify as SAAS, PAAS, MANAGED_API, INDUSTRY_SYSTEM, or PARTNER_SYSTEM
   - Include vendor information
@@ -219,10 +219,10 @@ generation_rules:
     External: EXT-{TYPE}-{VENDOR}-XXX
     
   criticality_assignment: |
-    CS1: Flight operations, safety-critical
-    CS2: Booking, revenue-critical
-    SL1: Customer-facing, experience-critical
-    SL2: Internal tools, productivity
+    CS1: Safety-critical operations, 99.99% SLA
+    CS2: Business-critical operations, 99.9% SLA
+    SL1: Customer-facing services, 99.5% SLA
+    SL2: Internal tools, 99% SLA
     STANDARD: Everything else
     
   validation_checks: |
@@ -251,15 +251,15 @@ version: 1.0.0
 
 context_template: |
   You are a technical documentation specialist that creates comprehensive architecture documentation.
-  
+
   Your outputs should be:
   1. Clear and concise
   2. Technically accurate
   3. Audience-appropriate
   4. Well-structured
   5. Searchable and indexed
-  
-  Follow BA documentation standards and templates.
+
+  Follow enterprise documentation standards and templates.
 
 templates:
   adr: |
@@ -328,8 +328,8 @@ agent: validation-agent
 version: 1.0.0
 
 context_template: |
-  You are a validation specialist that ensures C4 models meet BA architectural standards.
-  
+  You are a validation specialist that ensures C4 models meet enterprise architectural standards.
+
   Validate against:
   1. Schema compliance
   2. Business rules
@@ -389,15 +389,15 @@ version: 1.0.0
 
 context_template: |
   You are an infrastructure automation specialist that generates Terraform code from C4 models.
-  
+
   Generate:
   1. Resource definitions
   2. Network configurations
   3. Security groups
   4. Monitoring setup
   5. Scaling policies
-  
-  Follow BA cloud standards for AWS/Azure/GCP.
+
+  Follow enterprise cloud standards for AWS/Azure/GCP.
 
 generation_patterns:
   container_to_ecs: |
@@ -467,8 +467,9 @@ threat_modeling:
   compliance_checks:
     - GDPR data handling
     - PCI-DSS for payments
-    - IATA standards for aviation
+    - HIPAA for healthcare
     - SOC2 controls
+    - Industry-specific regulations
 ```
 
 ### 8. Fitness Function Agent (`fitness-agent`)
@@ -966,12 +967,12 @@ agents:
   validation:
     enabled: true
     strict_mode: true
-    rules_path: ./rules/ba-standards.yaml
-    
+    rules_path: ./rules/enterprise-standards.yaml
+
   documentation:
     enabled: true
     confluence:
-      url: https://confluence.ba.com
+      url: https://confluence.yourcompany.com
       space: ARCHITECTURE
       
   terraform:
@@ -1041,7 +1042,7 @@ sa-agent-toolkit/
 │       └── *.hbs
 │
 ├── rules/
-│   ├── ba-standards.yaml
+│   ├── enterprise-standards.yaml
 │   ├── security-rules.yaml
 │   └── fitness-functions.yaml
 │
@@ -1087,8 +1088,8 @@ async function analyzeSystem() {
   const model = await client.generateModel({
     discovery,
     businessContext: {
-      capability: 'flight_operations',
-      stakeholders: ['pilots', 'operations']
+      capability: 'customer_management',
+      stakeholders: ['customers', 'support']
     }
   });
   
