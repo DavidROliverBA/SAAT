@@ -682,6 +682,107 @@ def generate_terraform(
 
 
 @main.command()
+@click.option(
+    "--model-file",
+    "-m",
+    required=True,
+    type=click.Path(exists=True),
+    help="SAAT C4 model JSON file to export",
+)
+@click.option(
+    "--output",
+    "-o",
+    default="structurizr.json",
+    type=click.Path(),
+    help="Output Structurizr JSON file",
+)
+@click.pass_context
+def export_structurizr(ctx: click.Context, model_file: str, output: str) -> None:
+    """Export SAAT model to Structurizr JSON format.
+
+    Converts SAAT's internal C4 model to the industry-standard Structurizr JSON
+    format for compatibility with tools like bac4-standalone editor, Structurizr Lite,
+    and other C4 visualization tools.
+    """
+    click.echo(f"📤 Exporting to Structurizr format...")
+    click.echo(f"   Input: {model_file}")
+
+    try:
+        from saat.converters import export_to_structurizr_file
+
+        # Load SAAT model
+        model_data = json.loads(Path(model_file).read_text())
+        c4_model = C4Model(**model_data)
+
+        # Export to Structurizr
+        export_to_structurizr_file(c4_model, output)
+
+        click.echo(f"\n✅ Export complete!")
+        click.echo(f"   Output: {output}")
+        click.echo(f"\n💡 You can now:")
+        click.echo(f"   - Import into bac4-standalone editor")
+        click.echo(f"   - Use with Structurizr Lite")
+        click.echo(f"   - View with other C4 tools")
+
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
+
+
+@main.command()
+@click.option(
+    "--structurizr-file",
+    "-s",
+    required=True,
+    type=click.Path(exists=True),
+    help="Structurizr JSON file to import",
+)
+@click.option(
+    "--output",
+    "-o",
+    default="architecture.json",
+    type=click.Path(),
+    help="Output SAAT model JSON file",
+)
+@click.pass_context
+def import_structurizr(ctx: click.Context, structurizr_file: str, output: str) -> None:
+    """Import Structurizr JSON into SAAT model.
+
+    Converts Structurizr JSON (from bac4-standalone or other tools) into SAAT's
+    internal C4 model format for validation, documentation, security analysis,
+    and infrastructure generation.
+    """
+    click.echo(f"📥 Importing from Structurizr format...")
+    click.echo(f"   Input: {structurizr_file}")
+
+    try:
+        from saat.converters import import_from_structurizr_file
+
+        # Import from Structurizr
+        c4_model = import_from_structurizr_file(structurizr_file)
+
+        # Save SAAT model
+        output_path = Path(output)
+        output_path.write_text(c4_model.model_dump_json(indent=2))
+
+        click.echo(f"\n✅ Import complete!")
+        click.echo(f"   Systems: {len(c4_model.systems)}")
+        click.echo(f"   External Systems: {len(c4_model.externals)}")
+        click.echo(f"   Containers: {len(c4_model.containers)}")
+        click.echo(f"   Components: {len(c4_model.components)}")
+        click.echo(f"   Relationships: {len(c4_model.relationships)}")
+        click.echo(f"   Output: {output}")
+        click.echo(f"\n💡 You can now:")
+        click.echo(f"   saat validate-model -m {output}")
+        click.echo(f"   saat security-scan -m {output}")
+        click.echo(f"   saat generate-terraform -m {output} -p aws")
+
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
+
+
+@main.command()
 def info() -> None:
     """Display SAAT version and configuration information."""
     click.echo(f"SAAT v{__version__}")
