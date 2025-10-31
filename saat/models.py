@@ -263,3 +263,109 @@ class Pipeline(BaseModel):
     description: str = Field(..., description="Pipeline description")
     steps: list[PipelineStep] = Field(..., description="Pipeline steps")
     version: str = Field(default="1.0.0")
+
+
+# ============================================================================
+# Requirements (Greenfield Projects)
+# ============================================================================
+
+
+class Requirement(BaseModel):
+    """Single functional or non-functional requirement."""
+
+    id: str = Field(..., description="Requirement ID (e.g., REQ-001)")
+    title: str = Field(..., description="Short title")
+    description: str = Field(..., description="Detailed description")
+    type: str = Field(..., description="functional, non-functional, constraint")
+    priority: str = Field(default="medium", description="low, medium, high, critical")
+    source: Optional[str] = Field(None, description="Source file or stakeholder")
+    acceptance_criteria: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+
+
+class UserStory(BaseModel):
+    """User story for agile development."""
+
+    id: str = Field(..., description="Story ID (e.g., US-001)")
+    title: str = Field(..., description="Story title")
+    as_a: str = Field(..., description="User role")
+    i_want: str = Field(..., description="Desired functionality")
+    so_that: str = Field(..., description="Business value")
+    acceptance_criteria: list[str] = Field(default_factory=list)
+    priority: str = Field(default="medium")
+    estimated_effort: Optional[str] = Field(None, description="T-shirt size or points")
+
+
+class TechnicalConstraint(BaseModel):
+    """Technical constraint or limitation."""
+
+    id: str = Field(..., description="Constraint ID")
+    description: str = Field(..., description="Constraint description")
+    type: str = Field(..., description="performance, security, compliance, etc.")
+    rationale: Optional[str] = Field(None, description="Why this constraint exists")
+    impact: str = Field(default="medium", description="Impact level")
+
+
+class ProjectRequirements(BaseModel):
+    """Complete requirements for a greenfield project."""
+
+    project_name: str = Field(..., description="Project name")
+    description: str = Field(..., description="Project description")
+    requirements: list[Requirement] = Field(default_factory=list)
+    user_stories: list[UserStory] = Field(default_factory=list)
+    constraints: list[TechnicalConstraint] = Field(default_factory=list)
+    stakeholders: list[Stakeholder] = Field(default_factory=list)
+    success_criteria: list[str] = Field(default_factory=list)
+    timeline: Optional[str] = Field(None, description="Project timeline")
+    budget: Optional[str] = Field(None, description="Budget constraints")
+    source_documents: list[str] = Field(default_factory=list, description="Source files")
+    created: datetime = Field(default_factory=datetime.now)
+    last_updated: datetime = Field(default_factory=datetime.now)
+
+
+# ============================================================================
+# Agent Checklists & Approval
+# ============================================================================
+
+
+class ChecklistItem(BaseModel):
+    """Single item in an agent's task checklist."""
+
+    id: str = Field(..., description="Item ID")
+    description: str = Field(..., description="Task description")
+    estimated_duration: Optional[str] = Field(None, description="Estimated time")
+    dependencies: list[str] = Field(default_factory=list, description="Dependent item IDs")
+    completed: bool = Field(default=False)
+    result: Optional[str] = Field(None, description="Result or output")
+
+
+class AgentChecklist(BaseModel):
+    """Checklist of tasks an agent will perform."""
+
+    agent_name: str = Field(..., description="Agent performing tasks")
+    task_description: str = Field(..., description="Overall task description")
+    items: list[ChecklistItem] = Field(..., description="Checklist items")
+    estimated_total_duration: Optional[str] = Field(None)
+    requires_approval: bool = Field(default=True)
+    approved: bool = Field(default=False)
+    approved_by: Optional[str] = Field(None)
+    approved_at: Optional[datetime] = Field(None)
+    created_at: datetime = Field(default_factory=datetime.now)
+
+
+class ApprovalRequest(BaseModel):
+    """Request for human approval before proceeding."""
+
+    checklist: AgentChecklist = Field(..., description="Tasks to approve")
+    context: dict[str, Any] = Field(default_factory=dict, description="Additional context")
+    timeout_seconds: Optional[int] = Field(None, description="Auto-approve after timeout")
+    auto_approve: bool = Field(default=False, description="Skip approval (automation mode)")
+
+
+class ApprovalResponse(BaseModel):
+    """Response to approval request."""
+
+    approved: bool = Field(..., description="Whether approved")
+    modified_checklist: Optional[AgentChecklist] = Field(None, description="Modified checklist")
+    feedback: Optional[str] = Field(None, description="User feedback")
+    timestamp: datetime = Field(default_factory=datetime.now)

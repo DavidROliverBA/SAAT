@@ -4,9 +4,13 @@ AI-powered C4 architecture discovery and documentation using PydanticAI.
 """
 
 from saat.models import (
+    AgentChecklist,
     AgentError,
+    ApprovalRequest,
+    ApprovalResponse,
     BusinessContext,
     C4Model,
+    ChecklistItem,
     Component,
     ComplianceRequirement,
     Container,
@@ -19,10 +23,14 @@ from saat.models import (
     PatternMatch,
     Pipeline,
     PipelineStep,
+    ProjectRequirements,
     Relationship,
     RelationshipType,
+    Requirement,
     Stakeholder,
     SystemContext,
+    TechnicalConstraint,
+    UserStory,
     ValidationIssue,
     ValidationResult,
 )
@@ -56,4 +64,14 @@ __all__ = [
     # Pipeline
     "Pipeline",
     "PipelineStep",
+    # Requirements (Greenfield)
+    "ProjectRequirements",
+    "Requirement",
+    "UserStory",
+    "TechnicalConstraint",
+    # Checklists & Approval
+    "AgentChecklist",
+    "ChecklistItem",
+    "ApprovalRequest",
+    "ApprovalResponse",
 ]
