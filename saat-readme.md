@@ -1,14 +1,14 @@
 # Solution Architecture Agent Toolkit (SAAT)
 
 <p align="center">
-  <img src="./docs/images/saat-logo.png" alt="SAAT Logo" width="200"/>
+  <strong>🏗️ AI-Powered C4 Architecture Automation</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/your-org/saat/actions"><img src="https://github.com/your-org/saat/workflows/CI/badge.svg" alt="CI Status"></a>
-  <a href="https://www.npmjs.com/package/@your-org/saat"><img src="https://img.shields.io/npm/v/@your-org/saat.svg" alt="NPM Version"></a>
-  <a href="https://github.com/your-org/saat/blob/main/LICENSE"><img src="https://img.shields.io/github/license/your-org/saat.svg" alt="License"></a>
-  <a href="https://github.com/your-org/saat/stargazers"><img src="https://img.shields.io/github/stars/your-org/saat.svg" alt="Stars"></a>
+  <a href="https://github.com/DavidROliverBA/SAAT/actions"><img src="https://github.com/DavidROliverBA/SAAT/workflows/CI/badge.svg" alt="CI Status"></a>
+  <a href="https://www.npmjs.com/package/@saat/architecture-toolkit"><img src="https://img.shields.io/npm/v/@saat/architecture-toolkit.svg" alt="NPM Version"></a>
+  <a href="https://github.com/DavidROliverBA/SAAT/blob/main/LICENSE"><img src="https://img.shields.io/github/license/DavidROliverBA/SAAT.svg" alt="License"></a>
+  <a href="https://github.com/DavidROliverBA/SAAT/stargazers"><img src="https://img.shields.io/github/stars/DavidROliverBA/SAAT.svg" alt="Stars"></a>
 </p>
 
 ## 🚀 Overview
@@ -43,7 +43,7 @@ SAAT is a context-engineered AI agent toolkit that automates C4 architecture mod
 
 ```bash
 # Install globally
-npm install -g @your-org/saat
+npm install -g @saat/architecture-toolkit
 
 # Initialize a new project
 saat init my-architecture
@@ -76,15 +76,15 @@ saat pipeline run --config complete-analysis.yaml
 ### Install from NPM
 
 ```bash
-npm install -g @your-org/saat
+npm install -g @saat/architecture-toolkit
 ```
 
 ### Install from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/saat.git
-cd saat
+git clone https://github.com/DavidROliverBA/SAAT.git
+cd SAAT
 
 # Install dependencies
 npm install
@@ -103,13 +103,13 @@ saat --version
 
 ```bash
 # Pull the image
-docker pull your-org/saat:latest
+docker pull davidroliver/saat:latest
 
 # Run with Docker
 docker run -it \
   -v $(pwd):/workspace \
   -e CLAUDE_API_KEY=$CLAUDE_API_KEY \
-  your-org/saat discover /workspace
+  davidroliver/saat discover /workspace
 ```
 
 ### VS Code Extension
@@ -124,7 +124,7 @@ Install the SAAT extension from the VS Code marketplace:
 Or install via command line:
 
 ```bash
-code --install-extension your-org.saat-vscode
+code --install-extension saat.architecture-toolkit
 ```
 
 ## ⚙️ Configuration
@@ -322,7 +322,7 @@ saat watch --path <repository-path>
 #### JavaScript/TypeScript
 
 ```typescript
-import { SAATClient } from '@your-org/saat';
+import { SAATClient } from '@saat/architecture-toolkit';
 
 const client = new SAATClient({
   apiKey: process.env.CLAUDE_API_KEY,
@@ -351,7 +351,7 @@ if (validation.valid) {
   // Generate outputs
   const docs = await client.generateDocumentation(model, 'confluence');
   const terraform = await client.generateTerraform(model, 'aws');
-  
+
   console.log('Architecture analysis complete!');
 } else {
   console.error('Validation errors:', validation.errors);
@@ -715,7 +715,7 @@ Check the [`examples/`](examples/) directory for:
 ## 🔗 Resources
 
 - [C4 Model](https://c4model.com/) - Learn about C4 architecture diagrams
-- [British Airways Architecture Standards](docs/ba-standards.md) - BA-specific guidelines
+- [Architecture Standards](docs/architecture-standards.md) - Best practices and guidelines
 - [Claude API Documentation](https://docs.anthropic.com/) - LLM integration
 - [Confluence API](https://developer.atlassian.com/cloud/confluence/) - Documentation publishing
 
@@ -731,17 +731,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 💬 Support
 
-- [GitHub Issues](https://github.com/your-org/saat/issues) - Bug reports and feature requests
-- [Discussions](https://github.com/your-org/saat/discussions) - General discussions
+- [GitHub Issues](https://github.com/DavidROliverBA/SAAT/issues) - Bug reports and feature requests
+- [Discussions](https://github.com/DavidROliverBA/SAAT/discussions) - General discussions
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/saat) - Technical questions
-- [Discord](https://discord.gg/saat) - Community chat
+- Email: support@saat-toolkit.dev - Direct support
 
 ## 🚦 Status
 
-- Build: ![CI Status](https://github.com/your-org/saat/workflows/CI/badge.svg)
-- Coverage: ![Coverage](https://codecov.io/gh/your-org/saat/branch/main/graph/badge.svg)
-- Version: ![NPM Version](https://img.shields.io/npm/v/@your-org/saat.svg)
-- Downloads: ![NPM Downloads](https://img.shields.io/npm/dm/@your-org/saat.svg)
+- Build: ![CI Status](https://github.com/DavidROliverBA/SAAT/workflows/CI/badge.svg)
+- Coverage: ![Coverage](https://codecov.io/gh/DavidROliverBA/SAAT/branch/main/graph/badge.svg)
+- Version: ![NPM Version](https://img.shields.io/npm/v/@saat/architecture-toolkit.svg)
+- Downloads: ![NPM Downloads](https://img.shields.io/npm/dm/@saat/architecture-toolkit.svg)
 
 ---
 
