@@ -19,6 +19,7 @@
 - [Agent Usage Guide](#-agent-usage-guide)
 - [Refining & Improving Agents](#-refining--improving-agents)
 - [Recommended Workflow](#-recommended-workflow)
+- [Building from Scratch (Greenfield Projects)](#-building-from-scratch-greenfield-projects)
 - [Best Practices](#-best-practices)
 - [Examples](#-examples)
 - [Architecture](#-architecture)
@@ -990,6 +991,648 @@ generateModels().catch(console.error);
 - 🎯 Update business context quarterly
 - 👥 Review with team during sprint planning
 - 📝 Document all architectural decisions (ADRs)
+
+---
+
+## 🏗️ Building from Scratch (Greenfield Projects)
+
+When starting a **new project from scratch**, SAAT becomes a powerful **design-first architecture tool**. Instead of discovering existing code, you design your ideal architecture upfront, validate it, and then implement following that validated design.
+
+### Why Design-First with SAAT?
+
+- ✅ **Validate Before You Build** - Catch architectural issues before writing code
+- ✅ **Generate Infrastructure** - Auto-create Terraform, docs, and ADRs from your design
+- ✅ **Enforce Standards** - Ensure compliance from day one
+- ✅ **Guide Implementation** - Developers follow a validated architecture blueprint
+- ✅ **Continuous Validation** - Verify implementation matches design as you build
+
+### Greenfield Workflow: Design → Validate → Generate → Implement
+
+#### Phase 1: Design Your Architecture (Week 1)
+
+**Goal:** Create your ideal C4 architecture model manually
+
+```typescript
+// design-architecture.ts - Create your C4 model from scratch
+import { C4Model, SystemContext, Container, Component, Relationship } from '@saat/architecture-toolkit';
+import * as fs from 'fs-extra';
+
+const myArchitecture: C4Model = {
+  version: '1.0.0',
+  metadata: {
+    project: 'Payment Processing Platform',
+    author: 'Architecture Team',
+    created: new Date().toISOString(),
+    lastModified: new Date().toISOString(),
+    description: 'Secure, scalable payment processing for B2B transactions',
+    tags: ['fintech', 'payments', 'microservices']
+  },
+
+  // Define your system context
+  systems: [
+    {
+      id: 'SYS-PAYMENT-001',
+      name: 'Payment Processing Platform',
+      description: 'Handles all payment transactions, fraud detection, and reconciliation',
+      type: 'SystemContext',
+      technology: [],
+      tags: ['core-business'],
+      responsibilities: [
+        'Process payment transactions',
+        'Detect fraudulent activity',
+        'Generate financial reports',
+        'Handle refunds and chargebacks'
+      ],
+      criticality: 'CS1', // Critical System - 99.99% uptime
+      owner: 'payments-team@company.com',
+      repository: 'https://github.com/company/payment-platform',
+      documentation: 'https://wiki.company.com/payments'
+    }
+  ],
+
+  // Define your containers (services, databases, etc.)
+  containers: [
+    {
+      id: 'CON-API-001',
+      name: 'Payment API',
+      description: 'REST API for payment processing',
+      type: 'Container',
+      technology: ['Node.js', 'Express', 'TypeScript'],
+      tags: ['api', 'rest'],
+      systemId: 'SYS-PAYMENT-001',
+      responsibilities: [
+        'Accept payment requests',
+        'Validate payment data',
+        'Return transaction status'
+      ],
+      criticality: 'CS1',
+      interfaces: [
+        {
+          protocol: 'HTTPS',
+          port: 443,
+          authentication: 'OAuth2 + mTLS',
+          rateLimit: '1000 req/min'
+        }
+      ]
+    },
+    {
+      id: 'CON-FRAUD-001',
+      name: 'Fraud Detection Service',
+      description: 'ML-based fraud detection engine',
+      type: 'Container',
+      technology: ['Python', 'TensorFlow', 'FastAPI'],
+      tags: ['ml', 'security'],
+      systemId: 'SYS-PAYMENT-001',
+      responsibilities: [
+        'Analyze transaction patterns',
+        'Score fraud risk',
+        'Block suspicious transactions'
+      ],
+      criticality: 'CS2' // High criticality - 99.9% uptime
+    },
+    {
+      id: 'CON-DB-001',
+      name: 'Transaction Database',
+      description: 'Primary transactional data store',
+      type: 'Database',
+      technology: ['PostgreSQL 15', 'TimescaleDB'],
+      tags: ['database', 'primary'],
+      systemId: 'SYS-PAYMENT-001',
+      responsibilities: [
+        'Store transaction records',
+        'Maintain audit logs',
+        'Support real-time queries'
+      ],
+      criticality: 'CS1',
+      interfaces: [
+        {
+          protocol: 'PostgreSQL',
+          port: 5432,
+          authentication: 'Certificate-based',
+          encrypted: true
+        }
+      ]
+    }
+  ],
+
+  // Define external systems
+  externals: [
+    {
+      id: 'EXT-STRIPE-001',
+      name: 'Stripe Payment Gateway',
+      description: 'Third-party payment processing',
+      type: 'ExternalSystem',
+      technology: ['REST API'],
+      tags: ['payment-gateway', 'third-party'],
+      vendor: 'Stripe Inc.',
+      sla: '99.99%',
+      documentation: 'https://stripe.com/docs'
+    },
+    {
+      id: 'EXT-KYC-001',
+      name: 'KYC Verification Service',
+      description: 'Customer identity verification',
+      type: 'ExternalSystem',
+      technology: ['REST API'],
+      tags: ['compliance', 'kyc'],
+      vendor: 'Onfido',
+      sla: '99.9%'
+    }
+  ],
+
+  // Define relationships between components
+  relationships: [
+    {
+      id: 'REL-001',
+      source: 'CON-API-001',
+      target: 'CON-DB-001',
+      description: 'Stores transaction data',
+      type: 'uses',
+      protocol: 'PostgreSQL',
+      synchronous: true,
+      dataFlow: ['Transaction records', 'Query results']
+    },
+    {
+      id: 'REL-002',
+      source: 'CON-API-001',
+      target: 'CON-FRAUD-001',
+      description: 'Requests fraud check',
+      type: 'uses',
+      protocol: 'gRPC',
+      synchronous: false,
+      dataFlow: ['Transaction details', 'Risk score']
+    },
+    {
+      id: 'REL-003',
+      source: 'CON-API-001',
+      target: 'EXT-STRIPE-001',
+      description: 'Processes payment',
+      type: 'uses',
+      protocol: 'HTTPS',
+      synchronous: true,
+      dataFlow: ['Payment request', 'Payment confirmation']
+    }
+  ],
+
+  // Define components (internal modules) - optional for initial design
+  components: []
+};
+
+// Save your design
+await fs.writeJSON('./models/payment-platform-design.json', myArchitecture, { spaces: 2 });
+console.log('✅ Architecture design created');
+```
+
+**Deliverables:**
+- ✅ Complete C4 model with systems, containers, and relationships
+- ✅ Criticality levels assigned based on business requirements
+- ✅ Technology stack decisions documented
+- ✅ External dependencies identified
+
+#### Phase 2: Validate Your Design (Week 1-2)
+
+**Goal:** Ensure your architecture follows best practices and meets requirements
+
+```bash
+# Validate your design against enterprise standards
+./dist/cli/index.js validate --model models/payment-platform-design.json
+
+# Expected output:
+# ✅ All containers have technology specifications
+# ✅ Criticality levels are appropriate
+# ✅ External dependencies are documented
+# ⚠️  Warning: CON-FRAUD-001 missing disaster recovery plan
+# ⚠️  Warning: No monitoring strategy defined for CS1 systems
+```
+
+**Create custom validation rules:**
+
+```typescript
+// custom-validation.ts
+import { ValidationAgent } from '@saat/architecture-toolkit';
+
+class PaymentValidationAgent extends ValidationAgent {
+  async execute(task: string, params: ValidationParams) {
+    const baseValidation = await super.execute(task, params);
+
+    // Add payment-specific validations
+    const model = params.model;
+    const errors: AgentError[] = [];
+
+    // Rule: All payment containers must use encryption
+    model.containers.forEach(container => {
+      if (container.tags?.includes('payment')) {
+        const hasEncryption = container.interfaces?.some(i => i.encrypted === true);
+        if (!hasEncryption) {
+          errors.push({
+            code: 'PAYMENT_ENCRYPTION_REQUIRED',
+            message: `Container ${container.name} handles payments but doesn't specify encryption`,
+            severity: 'error',
+            source: 'PaymentValidationAgent',
+            context: { containerId: container.id }
+          });
+        }
+      }
+    });
+
+    // Rule: CS1 systems must have redundancy
+    model.systems.forEach(system => {
+      if (system.criticality === 'CS1') {
+        const hasBackup = model.relationships.some(
+          r => r.source === system.id && r.description?.includes('backup')
+        );
+        if (!hasBackup) {
+          errors.push({
+            code: 'CS1_REDUNDANCY_REQUIRED',
+            message: `CS1 system ${system.name} must have backup/redundancy defined`,
+            severity: 'error',
+            source: 'PaymentValidationAgent',
+            context: { systemId: system.id }
+          });
+        }
+      }
+    });
+
+    return {
+      ...baseValidation.data,
+      errors: [...baseValidation.data.errors, ...errors]
+    };
+  }
+}
+```
+
+**Deliverables:**
+- ✅ Validation report with all issues identified
+- ✅ Custom business rules applied
+- ✅ Security and compliance gaps documented
+- ✅ Refined architecture addressing all critical issues
+
+#### Phase 3: Generate Documentation & Infrastructure (Week 2)
+
+**Goal:** Auto-generate everything you need to start building
+
+```bash
+# Generate comprehensive documentation
+./dist/cli/index.js generate docs \
+  --model models/payment-platform-design.json \
+  --output docs/ \
+  --format markdown,confluence
+
+# Generate Terraform infrastructure
+./dist/cli/index.js generate terraform \
+  --model models/payment-platform-design.json \
+  --output infrastructure/ \
+  --provider aws
+
+# Generate ADRs (Architecture Decision Records)
+./dist/cli/index.js generate adrs \
+  --model models/payment-platform-design.json \
+  --output docs/adr/
+
+# Generate API specifications
+./dist/cli/index.js generate openapi \
+  --model models/payment-platform-design.json \
+  --container CON-API-001 \
+  --output api/openapi.yaml
+```
+
+**What gets generated:**
+
+**📁 Documentation (`docs/`)**
+- System context diagrams (C4 Level 1)
+- Container diagrams (C4 Level 2)
+- Component diagrams (C4 Level 3)
+- Deployment diagrams
+- Data flow diagrams
+- Architecture decision records (ADRs)
+
+**📁 Infrastructure (`infrastructure/`)**
+```hcl
+# infrastructure/main.tf - Auto-generated from C4 model
+resource "aws_ecs_service" "payment_api" {
+  name            = "payment-api"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.payment_api.arn
+  desired_count   = 3  # Based on CS1 criticality
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.payment_api.arn
+    container_name   = "payment-api"
+    container_port   = 443
+  }
+
+  # Auto-scaling based on criticality
+  # CS1 = Multi-AZ, auto-scaling, health checks
+}
+
+resource "aws_rds_instance" "transactions_db" {
+  identifier     = "transaction-database"
+  engine         = "postgres"
+  engine_version = "15"
+  instance_class = "db.r6g.xlarge"
+
+  # CS1 requirements
+  multi_az               = true
+  backup_retention_period = 35
+  deletion_protection    = true
+
+  # From C4 model specifications
+  allocated_storage = 100
+  storage_encrypted = true
+
+  tags = {
+    Criticality = "CS1"
+    ManagedBy   = "SAAT"
+  }
+}
+```
+
+**📁 API Specifications (`api/`)**
+```yaml
+# api/openapi.yaml - Generated from container definition
+openapi: 3.0.0
+info:
+  title: Payment API
+  description: REST API for payment processing
+  version: 1.0.0
+
+servers:
+  - url: https://api.payments.company.com
+    description: Production
+
+paths:
+  /transactions:
+    post:
+      summary: Create payment transaction
+      security:
+        - oauth2: [payments:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transaction'
+      responses:
+        '201':
+          description: Transaction created
+        '429':
+          description: Rate limit exceeded (1000 req/min)
+```
+
+**Deliverables:**
+- ✅ Complete documentation suite
+- ✅ Infrastructure-as-Code ready to deploy
+- ✅ API contracts defined
+- ✅ ADRs documenting key decisions
+
+#### Phase 4: Implement Following the Design (Weeks 3-12)
+
+**Goal:** Build your system following the validated architecture
+
+```bash
+# Step 1: Set up infrastructure
+cd infrastructure/
+terraform init
+terraform plan
+terraform apply
+
+# Step 2: Create service repositories based on containers
+mkdir -p services/payment-api
+mkdir -p services/fraud-detection
+mkdir -p services/shared-libraries
+
+# Step 3: Implement following the C4 model specifications
+# For each container in your model:
+# - Use the specified technologies
+# - Implement the defined responsibilities
+# - Follow the interface specifications
+# - Connect to defined dependencies
+```
+
+**Example: Implementing Payment API Container**
+
+```typescript
+// services/payment-api/src/index.ts
+// Built following CON-API-001 specification from C4 model
+
+import express from 'express';
+import { fraudClient } from './clients/fraud-detection';
+import { db } from './clients/database';
+import { stripeClient } from './clients/stripe';
+
+const app = express();
+
+// From C4 model: interface specification
+// Protocol: HTTPS, Port: 443, Auth: OAuth2 + mTLS, Rate: 1000 req/min
+app.post('/transactions', authenticate, rateLimit({ max: 1000 }), async (req, res) => {
+  // Responsibility 1: Accept payment requests
+  const transaction = req.body;
+
+  // Responsibility 2: Validate payment data
+  const validation = validateTransaction(transaction);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
+  }
+
+  // REL-002: Request fraud check from CON-FRAUD-001
+  const fraudCheck = await fraudClient.analyzeTransaction(transaction);
+  if (fraudCheck.riskScore > 0.8) {
+    return res.status(403).json({ error: 'Transaction blocked - high fraud risk' });
+  }
+
+  // REL-003: Process payment via EXT-STRIPE-001
+  const payment = await stripeClient.charge({
+    amount: transaction.amount,
+    currency: transaction.currency,
+    source: transaction.paymentMethod
+  });
+
+  // REL-001: Store transaction in CON-DB-001
+  await db.transactions.create({
+    id: payment.id,
+    amount: transaction.amount,
+    status: payment.status,
+    fraudScore: fraudCheck.riskScore,
+    timestamp: new Date()
+  });
+
+  // Responsibility 3: Return transaction status
+  res.status(201).json({
+    transactionId: payment.id,
+    status: payment.status
+  });
+});
+
+// From C4 model: criticality CS1 requires health checks
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy' });
+});
+
+app.listen(443);
+```
+
+**Implementation Guidelines:**
+- ✅ Each container becomes a separate service/repository
+- ✅ Implement ALL responsibilities defined in the C4 model
+- ✅ Follow interface specifications (protocols, ports, auth)
+- ✅ Connect to dependencies as defined in relationships
+- ✅ Implement health checks for CS1/CS2 containers
+- ✅ Add monitoring based on criticality levels
+
+#### Phase 5: Continuous Validation (Weekly)
+
+**Goal:** Ensure implementation matches your design
+
+```bash
+# Run discovery on your implementation
+./dist/cli/index.js discover \
+  --path ./services/payment-api \
+  --output models/payment-api-actual.json
+
+# Compare actual vs. design
+./dist/cli/index.js compare \
+  --expected models/payment-platform-design.json \
+  --actual models/payment-api-actual.json \
+  --output reports/drift-report.json
+
+# Expected output:
+# ✅ All containers implemented
+# ✅ Technologies match design (Node.js, TypeScript)
+# ⚠️  Warning: Additional dependency found: Redis (not in design)
+# ❌ Error: CON-FRAUD-001 not found - missing implementation
+```
+
+**Drift Detection:**
+
+```typescript
+// check-drift.ts - Run in CI/CD pipeline
+import { SAATClient } from '@saat/architecture-toolkit';
+
+async function checkArchitecturalDrift() {
+  const client = new SAATClient({ apiKey: process.env.CLAUDE_API_KEY });
+
+  // Load the design (source of truth)
+  const design = await fs.readJSON('./models/payment-platform-design.json');
+
+  // Discover actual implementation
+  const actual = await client.discover({ path: './services' });
+
+  // Compare
+  const drift = await client.compare({
+    expected: design,
+    actual: actual.model
+  });
+
+  if (drift.hasBreakingChanges) {
+    console.error('❌ Breaking changes detected!');
+    console.error(drift.breakingChanges);
+    process.exit(1); // Fail CI/CD
+  }
+
+  if (drift.hasWarnings) {
+    console.warn('⚠️  Architecture drift detected:');
+    console.warn(drift.warnings);
+  }
+
+  console.log('✅ Implementation matches design');
+}
+```
+
+**Deliverables:**
+- ✅ Drift reports showing design vs. implementation
+- ✅ Automated validation in CI/CD
+- ✅ Updated C4 model reflecting any approved changes
+- ✅ Working system that matches validated architecture
+
+### Key Benefits for Greenfield Projects
+
+| Benefit | Traditional Approach | SAAT Design-First |
+|---------|---------------------|-------------------|
+| **Architecture Validation** | After implementation | Before writing code |
+| **Documentation** | Manual, often outdated | Auto-generated, always in sync |
+| **Infrastructure** | Manual Terraform writing | Auto-generated from design |
+| **Compliance** | Checked in audit | Validated upfront |
+| **Team Alignment** | Tribal knowledge | Single source of truth |
+| **Onboarding** | Weeks to understand | Hours with clear C4 models |
+| **Change Management** | Risky, undocumented | Validated, tracked |
+
+### Best Practices for Greenfield
+
+1. **Start with Business Context**
+   - Define stakeholders, capabilities, and compliance requirements FIRST
+   - Let business needs drive technology choices
+
+2. **Design at the Right Level**
+   - Start with System Context (C4 Level 1)
+   - Define Containers next (C4 Level 2)
+   - Add Components later as implementation progresses (C4 Level 3)
+
+3. **Validate Early, Validate Often**
+   - Run validation after each design iteration
+   - Create custom validation rules for your domain
+   - Get stakeholder approval before implementation
+
+4. **Generate Infrastructure First**
+   - Deploy infrastructure before writing code
+   - Test connectivity and performance early
+   - Validate costs match budget
+
+5. **Implement Container-by-Container**
+   - Build one container at a time
+   - Validate each implementation matches design
+   - Update C4 model with approved changes
+
+6. **Treat Design as Code**
+   - Version control your C4 models
+   - Review architecture changes like code reviews
+   - Use CI/CD to validate drift
+
+### Common Greenfield Patterns
+
+**Pattern 1: Microservices Platform**
+```
+System: E-commerce Platform
+├── Container: API Gateway (Kong)
+├── Container: Product Service (Node.js)
+├── Container: Order Service (Node.js)
+├── Container: Payment Service (Node.js)
+├── Container: Notification Service (Python)
+├── Database: Product DB (PostgreSQL)
+├── Database: Order DB (PostgreSQL)
+└── External: Stripe, SendGrid, Auth0
+```
+
+**Pattern 2: Data Platform**
+```
+System: Analytics Platform
+├── Container: Data Ingestion API (Python/FastAPI)
+├── Container: Stream Processor (Kafka + Flink)
+├── Container: Data Warehouse (Snowflake)
+├── Container: Analytics API (Node.js)
+├── Container: Dashboard UI (React)
+└── External: S3, Airflow, Tableau
+```
+
+**Pattern 3: Serverless Application**
+```
+System: Document Processing
+├── Container: Upload API (AWS Lambda)
+├── Container: Processing Queue (SQS)
+├── Container: Document Processor (Lambda)
+├── Container: Storage (S3)
+├── Container: Notification Service (SNS)
+└── External: OCR Service, Database
+```
+
+### Next Steps
+
+1. **Create your first design** - Use the example above as a template
+2. **Validate it** - Run SAAT validation to catch issues
+3. **Generate infrastructure** - Get Terraform/CloudFormation ready
+4. **Implement incrementally** - Build one container at a time
+5. **Validate continuously** - Check for drift weekly
+
+**Need help?** Check the [Examples](#-examples) section for complete greenfield project walkthroughs.
 
 ---
 
