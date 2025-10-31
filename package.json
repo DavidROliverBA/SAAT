@@ -1,0 +1,92 @@
+{
+  "name": "@saat/architecture-toolkit",
+  "version": "1.0.0",
+  "description": "Solution Architecture Agent Toolkit for C4 model automation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "saat": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/cli/index.js",
+    "build:dev": "tsc --watch",
+    "build:prod": "tsc --project tsconfig.prod.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:e2e": "jest --testPathPattern=e2e",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "start:api": "node dist/api/server.js",
+    "dev:api": "nodemon --exec ts-node src/api/server.ts",
+    "docker:build": "docker build -t saat:latest .",
+    "docker:run": "docker-compose up -d",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "architecture",
+    "c4-model",
+    "solution-architecture",
+    "ai-agents",
+    "documentation",
+    "terraform"
+  ],
+  "author": "SAAT Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.0",
+    "commander": "^11.0.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "yaml": "^2.3.1",
+    "ajv": "^8.12.0",
+    "fs-extra": "^11.1.1",
+    "glob": "^10.3.3",
+    "chokidar": "^3.5.3",
+    "axios": "^1.4.0",
+    "redis": "^4.6.7",
+    "pg": "^8.11.1",
+    "winston": "^3.10.0",
+    "chalk": "^5.3.0",
+    "ora": "^6.3.1",
+    "inquirer": "^9.2.7",
+    "handlebars": "^4.7.8",
+    "marked": "^5.1.1",
+    "cli-table3": "^0.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.2",
+    "@types/express": "^4.17.17",
+    "@types/fs-extra": "^11.0.1",
+    "@types/jest": "^29.5.3",
+    "@types/pg": "^8.10.2",
+    "@types/inquirer": "^9.0.3",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "jest": "^29.6.1",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.0",
+    "supertest": "^6.3.3",
+    "@types/supertest": "^2.0.12"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidROliverBA/SAAT.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DavidROliverBA/SAAT/issues"
+  },
+  "homepage": "https://github.com/DavidROliverBA/SAAT#readme"
+}
