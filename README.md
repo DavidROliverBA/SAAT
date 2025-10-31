@@ -1,11 +1,11 @@
 # SAAT - Solution Architecture Agent Toolkit
 
 <p align="center">
-  <strong>🤖 AI-Powered C4 Architecture Discovery & Documentation with PydanticAI</strong>
+  <strong>🤖 AI-Powered C4 Architecture Discovery, Analysis & Infrastructure Generation</strong>
 </p>
 
 <p align="center">
-  Automate architecture discovery, C4 model generation, and documentation using specialized AI agents powered by PydanticAI
+  Complete architecture toolkit: Analyze existing code, extract requirements, validate compliance, analyze security, generate documentation, and create infrastructure-as-code using specialized AI agents powered by PydanticAI
 </p>
 
 ---
@@ -15,84 +15,139 @@
 - [Overview](#-overview)
 - [Quick Start](#-quick-start)
 - [Installation](#-installation)
+- [Core Concepts](#-core-concepts)
+- [Workflows](#-workflows)
+  - [Brownfield (Existing Code)](#brownfield-existing-code-analysis)
+  - [Greenfield (From Scratch)](#greenfield-from-scratch-design)
 - [Available Agents](#-available-agents)
-- [CLI Usage](#-cli-usage)
-- [Programmatic Usage](#-programmatic-usage)
-- [Building from Scratch (Greenfield Projects)](#-building-from-scratch-greenfield-projects)
-- [Refining & Improving Agents](#-refining--improving-agents)
+- [CLI Commands](#-cli-commands)
+- [bac4-standalone Integration](#-bac4-standalone-visual-editor-integration)
+- [Claude Code Integration](#-claude-code-integration-mcp)
 - [Model Support](#-model-support)
-- [Best Practices](#-best-practices)
 - [Examples](#-examples)
 - [Architecture](#-architecture)
-- [Contributing](#-contributing)
 
 ---
 
 ## 🎯 Overview
 
-SAAT is a **PydanticAI-powered** agent toolkit that automates the creation, validation, and documentation of C4 architecture models. Built with production-grade features including multi-model support, observability, and type-safe validation.
+SAAT is a **complete architecture toolkit** powered by PydanticAI that supports the entire software architecture lifecycle:
+
+- **Discover** architecture from existing codebases (brownfield)
+- **Extract** requirements from documents (greenfield)
+- **Generate** C4 models automatically
+- **Validate** against compliance frameworks (PCI-DSS, HIPAA, GDPR, SOC2)
+- **Analyze** security posture and generate threat models
+- **Generate** comprehensive documentation (Markdown, PlantUML, Mermaid, ADRs)
+- **Create** production-ready infrastructure-as-code (Terraform for AWS/Azure/GCP)
+- **Visualize** with bac4-standalone C4 editor integration
 
 ### Key Features
 
-- 🔍 **Automated Discovery** - Analyze codebases to extract architecture
-- 🏗️ **C4 Model Generation** - Create valid C4 models automatically
-- ✅ **Type-Safe Validation** - Pydantic models ensure correctness
-- 🤖 **Multi-Model Support** - Use Claude, GPT-4, Gemini, or local models
-- 📊 **Built-in Observability** - Pydantic Logfire integration
-- 🔄 **Durable Execution** - Survive API failures and restarts
-- 🎯 **Production Ready** - Retry logic, streaming, error handling
+✅ **6 Specialized AI Agents** - Each with checklist workflow and approval system
+✅ **Brownfield & Greenfield** - Analyze existing code OR design from requirements
+✅ **Structurizr JSON Standard** - Industry-standard format for C4 models
+✅ **bac4-standalone Integration** - Visual editing with round-trip conversion
+✅ **Human-in-the-Loop** - Interactive approval with auto-approve mode
+✅ **Multi-Model Support** - Claude, GPT-4, Gemini, Ollama
+✅ **Claude Code MCP** - Seamless integration with Claude Code
+✅ **Production Ready** - Retry logic, streaming, error handling
+✅ **Type-Safe** - Pydantic models ensure correctness
 
-### Powered by PydanticAI
+### Why SAAT?
 
-SAAT leverages [PydanticAI](https://ai.pydantic.dev/) for:
-- **Type-safe agents** with automatic validation
-- **Multi-model support** across providers
-- **Structured outputs** with Pydantic models
-- **Tool calling** for repository analysis
-- **Observability** and monitoring
+Traditional architecture tools require manual diagram creation and maintenance. SAAT **automates** the entire process:
+
+```
+Traditional:                           SAAT:
+┌─────────────────┐                   ┌─────────────────┐
+│ Manual Analysis │                   │ AI Analyzes     │
+│ (days/weeks)    │                   │ (minutes)       │
+└─────────────────┘                   └─────────────────┘
+         ↓                                      ↓
+┌─────────────────┐                   ┌─────────────────┐
+│ Draw Diagrams   │                   │ Auto-Generate   │
+│ (hours)         │                   │ C4 Models       │
+└─────────────────┘                   └─────────────────┘
+         ↓                                      ↓
+┌─────────────────┐                   ┌─────────────────┐
+│ Write Docs      │                   │ Validate &      │
+│ (days)          │                   │ Document        │
+└─────────────────┘                   └─────────────────┘
+         ↓                                      ↓
+┌─────────────────┐                   ┌─────────────────┐
+│ Manual Updates  │                   │ Generate        │
+│ (ongoing pain)  │                   │ Infrastructure  │
+└─────────────────┘                   └─────────────────┘
+```
 
 ---
 
 ## 🚀 Quick Start
 
-```bash
-# 1. Clone the repository
-git clone https://github.com/DavidROliverBA/SAAT.git
-cd SAAT
+### Brownfield: Analyze Existing Code
 
-# 2. Install with pip
+```bash
+# 1. Install SAAT
 pip install -e .
 
-# Or with Poetry
-poetry install
+# 2. Set API key
+export ANTHROPIC_API_KEY="your-key"
 
-# 3. Set up environment
-cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
+# 3. Analyze your codebase
+saat analyze --path /path/to/your/code -o architecture.json
 
-# 4. Run analysis
-saat analyze --path /path/to/your/code --output architecture.json
+# 4. Validate against PCI-DSS
+saat validate-model -m architecture.json -f PCI-DSS
 
-# 5. View results
-cat architecture.json | python -m json.tool
+# 5. Generate AWS infrastructure
+saat generate-terraform -m architecture.json -p aws -o infrastructure/
+
+# 6. Generate documentation
+saat generate-docs -m architecture.json -f markdown -f plantuml -o docs/
+```
+
+### Greenfield: Design from Requirements
+
+```bash
+# 1. Extract requirements from PRD
+saat discover-requirements -f docs/requirements.md -n "Payment Platform" -o requirements.json
+
+# 2. Generate architecture (manual or from template)
+# TODO: saat generate-from-requirements --requirements requirements.json -o architecture.json
+
+# 3. Export for visual editing
+saat export-structurizr -m architecture.json -o structurizr.json
+
+# 4. Open bac4-standalone → Import → Edit → Export
+
+# 5. Import refined model
+saat import-structurizr -s structurizr.json -o architecture-final.json
+
+# 6. Generate everything
+saat validate-model -m architecture-final.json -f HIPAA
+saat security-scan -m architecture-final.json --threat-model
+saat generate-terraform -m architecture-final.json -p aws
 ```
 
 ---
 
 ## 📦 Installation
 
+### Prerequisites
+
+- Python 3.11+
+- API key for Claude, GPT-4, or other supported models
+
 ### Option 1: pip (Recommended)
 
 ```bash
-# Install from source
 git clone https://github.com/DavidROliverBA/SAAT.git
 cd SAAT
 pip install -e .
 
-# Or install specific extras
-pip install -e ".[all]"  # All features (Logfire, OpenAI, Gemini)
-pip install -e ".[logfire]"  # Just observability
-pip install -e ".[openai]"  # Add OpenAI support
+# Or with all extras
+pip install -e ".[all]"  # Logfire, OpenAI, Gemini support
 ```
 
 ### Option 2: Poetry
@@ -101,812 +156,761 @@ pip install -e ".[openai]"  # Add OpenAI support
 git clone https://github.com/DavidROliverBA/SAAT.git
 cd SAAT
 poetry install
-
-# With extras
-poetry install -E all
 ```
-
-### Requirements
-
-- Python 3.9+
-- API key for at least one model provider:
-  - **Anthropic Claude** (recommended): Get key at [console.anthropic.com](https://console.anthropic.com)
-  - **OpenAI**: Get key at [platform.openai.com](https://platform.openai.com)
-  - **Google Gemini**: Get key at [makersuite.google.com](https://makersuite.google.com)
 
 ### Environment Setup
 
 ```bash
-# Required: Set your API key
-export ANTHROPIC_API_KEY="sk-ant-api03-your-key-here"
+# Create .env file
+cp .env.example .env
+
+# Add your API keys
+echo "ANTHROPIC_API_KEY=your-key-here" >> .env
 
 # Optional: Choose default model
-export SAAT_MODEL="anthropic:claude-sonnet-4"
+echo "SAAT_MODEL=anthropic:claude-sonnet-4" >> .env
+```
 
-# Optional: Enable observability
-export LOGFIRE_TOKEN="your-logfire-token"
+### Verify Installation
+
+```bash
+saat --version
+saat info
+```
+
+---
+
+## 🧠 Core Concepts
+
+### C4 Model
+
+SAAT uses the [C4 model](https://c4model.com) for software architecture:
+
+- **Level 1 - System Context**: High-level systems and external dependencies
+- **Level 2 - Container**: Applications, databases, microservices
+- **Level 3 - Component**: Code-level modules and services
+- **Level 4 - Code**: Classes and functions (future)
+
+### Criticality Levels
+
+SAAT assigns criticality to guide infrastructure decisions:
+
+| Level | Uptime | Infrastructure | Use Case |
+|-------|--------|---------------|----------|
+| **CS1** | 99.99% | Multi-AZ, auto-scaling 2-10, 35d backups | Mission critical (payments, auth) |
+| **CS2** | 99.9% | Multi-AZ, auto-scaling 2-5, 7d backups | Business critical (APIs, databases) |
+| **SL1** | 99.5% | Single-AZ, basic monitoring, 3d backups | Standard services |
+| **SL2** | 99% | Single-AZ, minimal config, 3d backups | Internal tools |
+| **STANDARD** | Best effort | Minimal, no backups | Development, testing |
+
+### Checklist Workflow
+
+All agents follow a consistent workflow:
+
+```
+1. Generate Checklist → 2. Show to User → 3. Request Approval → 4. Execute Tasks
+```
+
+**Interactive Mode** (default):
+```bash
+saat validate-model -m architecture.json
+
+📋 ValidationAgent Checklist:
+  [ ] Load and parse C4 model
+  [ ] Check structural integrity
+  [ ] Validate relationships
+  [ ] Check completeness
+  [ ] Verify criticality assignments
+
+Proceed? [y/N]: y
+```
+
+**Auto-Approve Mode**:
+```bash
+saat -y validate-model -m architecture.json
+# or
+saat --auto-approve validate-model -m architecture.json
+```
+
+---
+
+## 🔄 Workflows
+
+### Brownfield: Existing Code Analysis
+
+Analyze an existing codebase to generate architecture models:
+
+```bash
+# Step 1: Discovery
+saat discover --path /my-app --output discovery.json
+
+# Step 2: Generate C4 Model
+saat generate --discovery discovery.json --output architecture.json
+
+# Or do both in one command:
+saat analyze --path /my-app --output architecture.json
+
+# Step 3: Validate
+saat validate-model -m architecture.json -f PCI-DSS -o validation.json
+
+# Step 4: Security Analysis
+saat security-scan -m architecture.json --threat-model -o security.json
+
+# Step 5: Generate Documentation
+saat generate-docs -m architecture.json -f markdown -f plantuml -o docs/
+
+# Step 6: Generate Infrastructure
+saat generate-terraform -m architecture.json -p aws -r us-east-1 -o infrastructure/
+```
+
+### Greenfield: From-Scratch Design
+
+Design a new system from requirements:
+
+```bash
+# Step 1: Extract Requirements
+saat discover-requirements \\
+  -f docs/PRD.md \\
+  -f docs/tech-requirements.md \\
+  -n "Payment Processing Platform" \\
+  -o requirements.json
+
+# Output: requirements.json with:
+# - Functional requirements (REQ-F-001, REQ-F-002, ...)
+# - Non-functional requirements (REQ-NF-001: 99.9% uptime, ...)
+# - User stories (US-001: As a customer, I want...)
+# - Technical constraints (CONST-001: PCI-DSS, ...)
+# - Stakeholders
+
+# Step 2: Design Architecture
+# TODO: Implement generate-from-requirements
+# For now: Manually create or use templates
+
+# Step 3: Validate & Refine (same as brownfield)
+saat validate-model -m architecture.json -f PCI-DSS
+saat security-scan -m architecture.json
+saat generate-terraform -m architecture.json -p aws
+```
+
+### Round-Trip with bac4-standalone
+
+Combine AI analysis with visual editing:
+
+```bash
+# 1. Generate with SAAT
+saat analyze --path /my-app -o architecture.json
+
+# 2. Export to Structurizr format
+saat export-structurizr -m architecture.json -o structurizr.json
+
+# 3. Edit visually in bac4-standalone
+# - Import structurizr.json
+# - Drag & drop to refine layout
+# - Add missing elements
+# - Clarify relationships
+# - Export as structurizr-refined.json
+
+# 4. Import back to SAAT
+saat import-structurizr -s structurizr-refined.json -o architecture-refined.json
+
+# 5. Generate infrastructure from refined model
+saat generate-terraform -m architecture-refined.json -p aws
 ```
 
 ---
 
 ## 🤖 Available Agents
 
-### Implemented Agents
+### 1. Discovery Agent (Brownfield)
+**Purpose**: Analyze existing codebases to discover architecture
 
-#### 1. **Discovery Agent** ✅
-- **Purpose**: Analyze repositories to discover architecture
-- **Capabilities**:
-  - Technology detection (languages, frameworks, databases)
-  - Pattern recognition (microservices, event-driven, etc.)
-  - Entry point identification
-  - Confidence scoring with evidence
-- **Model**: Uses PydanticAI with tool calling for repository exploration
-- **Output**: `DiscoveryResult` with technologies, patterns, and metadata
+```python
+from saat.agents import DiscoveryAgent
 
-#### 2. **Generator Agent** ✅
-- **Purpose**: Convert discovery results into C4 models
-- **Capabilities**:
-  - Generate Systems, Containers, Components
-  - Infer relationships and data flows
-  - Assign criticality levels (CS1, CS2, SL1, etc.)
-  - Apply business context rules
-- **Model**: Uses PydanticAI with structured output validation
-- **Output**: Complete `C4Model` with all elements and relationships
+agent = DiscoveryAgent()
+discovery = await agent.analyze_repository("/path/to/repo", max_depth=3)
 
-### Agents Ready to Implement
+# Discovers:
+# - Technologies used
+# - Architectural patterns (microservices, MVC, etc.)
+# - Services and components
+# - Dependencies
+```
 
-#### 3. **Validation Agent** 🔜
-- Validate C4 models against enterprise standards
-- Check compliance requirements (PCI-DSS, GDPR, SOC2)
-- Identify missing relationships or incomplete descriptions
-- Suggest improvements
+### 2. Generator Agent
+**Purpose**: Generate C4 models from discovery results
 
-#### 4. **Documentation Agent** 🔜
-- Generate markdown documentation from C4 models
-- Create architecture decision records (ADRs)
-- Publish to Confluence or wikis
-- Generate diagrams (PlantUML, Mermaid)
+```python
+from saat.agents import GeneratorAgent
 
-#### 5. **Security Agent** 🔜
-- Analyze security posture from C4 models
-- Identify unencrypted communications
-- Check authentication mechanisms
-- Generate security reports
+agent = GeneratorAgent()
+model = await agent.generate_model(discovery, business_context)
 
-#### 6. **Terraform Agent** 🔜
-- Generate infrastructure-as-code from C4 models
-- Support AWS, Azure, GCP
-- Apply criticality-based configurations
-- Create monitoring and alerting
+# Generates:
+# - System Context diagrams
+# - Container diagrams
+# - Component diagrams
+# - Relationships
+```
+
+### 3. Requirements Agent (Greenfield)
+**Purpose**: Extract requirements from documents
+
+```python
+from saat.agents import RequirementsAgent
+
+agent = RequirementsAgent()
+result = await agent.discover_requirements(
+    file_paths=["docs/PRD.md", "docs/tech-spec.md"],
+    project_name="Payment Platform",
+    auto_approve=False  # Interactive mode
+)
+
+# Extracts:
+# - Functional requirements (REQ-F-001, ...)
+# - Non-functional requirements (performance, security, ...)
+# - User stories (As a... I want... So that...)
+# - Technical constraints (compliance, technology choices, ...)
+# - Stakeholders
+```
+
+### 4. Validation Agent
+**Purpose**: Validate C4 models against standards
+
+```python
+from saat.agents import ValidationAgent
+
+agent = ValidationAgent()
+result = await agent.validate_model(
+    model=c4_model,
+    framework="PCI-DSS",  # or HIPAA, GDPR, SOC2
+    auto_approve=True
+)
+
+# Validates:
+# - Structural integrity (no orphaned elements)
+# - Relationship consistency
+# - Completeness
+# - Compliance with frameworks
+# - Best practices
+```
+
+### 5. Documentation Agent
+**Purpose**: Generate comprehensive documentation
+
+```python
+from saat.agents import DocumentationAgent
+
+agent = DocumentationAgent()
+result = await agent.generate_documentation(
+    model=c4_model,
+    output_dir="docs/",
+    formats=["markdown", "plantuml", "mermaid", "adr"],
+    auto_approve=False
+)
+
+# Generates:
+# - Markdown overview
+# - PlantUML C4 diagrams
+# - Mermaid diagrams
+# - Architecture Decision Records (ADRs)
+```
+
+### 6. Security Agent
+**Purpose**: Analyze security posture
+
+```python
+from saat.agents import SecurityAgent
+
+agent = SecurityAgent()
+result = await agent.analyze_security(
+    model=c4_model,
+    threat_model=True,
+    output_file="security-report.json",
+    auto_approve=False
+)
+
+# Analyzes:
+# - Unencrypted communications
+# - Missing authentication
+# - Sensitive data exposure
+# - Access controls
+# - Compliance violations
+# - Threat modeling (STRIDE)
+```
+
+### 7. Terraform Agent
+**Purpose**: Generate infrastructure-as-code
+
+```python
+from saat.agents import TerraformAgent
+
+agent = TerraformAgent()
+result = await agent.generate_terraform(
+    model=c4_model,
+    provider="aws",  # or azure, gcp
+    region="us-east-1",
+    output_dir="infrastructure/",
+    auto_approve=False
+)
+
+# Generates:
+# - main.tf (resources based on criticality)
+# - variables.tf
+# - outputs.tf
+# - terraform.tfvars.example
+# - Multi-AZ for CS1/CS2
+# - Auto-scaling based on criticality
+# - Backups (35d for CS1, 7d for CS2, 3d for SL1/SL2)
+```
 
 ---
 
-## 💻 CLI Usage
+## 🖥️ CLI Commands
 
-### Discover Architecture
-
-```bash
-# Analyze a repository
-saat discover --path /path/to/repo --output discovery.json
-
-# With maximum depth control
-saat discover --path /path/to/repo --max-depth 5 --output discovery.json
-```
-
-**Output**: `discovery.json` with technologies, patterns, entry points, and confidence scores.
-
-### Generate C4 Model
+### Analysis Commands
 
 ```bash
-# Generate from discovery
-saat generate --discovery discovery.json --output c4-model.json
+# Discover architecture from code
+saat discover --path /repo --output discovery.json [--max-depth 3]
 
-# With business context
-saat generate \
-  --discovery discovery.json \
-  --business-context business.json \
-  --output c4-model.json
+# Generate C4 model from discovery
+saat generate --discovery discovery.json --output architecture.json
+
+# Full analysis (discover + generate)
+saat analyze --path /repo --output architecture.json [--business-context context.json]
 ```
 
-### Full Analysis (Recommended)
+### Requirements (Greenfield)
 
 ```bash
-# Discover and generate in one command
-saat analyze --path /path/to/repo --output architecture.json
-
-# Save intermediate discovery
-saat analyze \
-  --path /path/to/repo \
-  --output architecture.json \
-  --save-discovery
-
-# With business context
-saat analyze \
-  --path /path/to/repo \
-  --business-context business.json \
-  --output architecture.json
+# Extract requirements from documents
+saat discover-requirements \\
+  -f docs/PRD.md \\
+  -f docs/constraints.md \\
+  -n "Project Name" \\
+  -o requirements.json
 ```
 
-### Validate Model
+### Validation
 
 ```bash
-# Check model for issues
-saat validate --model-file c4-model.json
+# Validate C4 model
+saat validate-model -m architecture.json -o validation-report.json
+
+# Validate with compliance framework
+saat validate-model -m architecture.json -f PCI-DSS
+saat validate-model -m architecture.json -f HIPAA
+saat validate-model -m architecture.json -f GDPR
 ```
 
-### Change Model
+### Security
 
 ```bash
-# Use GPT-4
-saat --model openai:gpt-4 analyze --path /path/to/repo
+# Security analysis
+saat security-scan -m architecture.json -o security-report.json
 
-# Use Gemini
-saat --model gemini-1.5-pro analyze --path /path/to/repo
-
-# Use local Ollama
-saat --model ollama:llama2 analyze --path /path/to/repo
+# Include threat modeling
+saat security-scan -m architecture.json --threat-model
 ```
 
-### Get Info
+### Documentation
+
+```bash
+# Generate documentation (multiple formats)
+saat generate-docs -m architecture.json -f markdown -f plantuml -o docs/
+
+# All formats
+saat generate-docs -m architecture.json \\
+  -f markdown \\
+  -f plantuml \\
+  -f mermaid \\
+  -f adr \\
+  -o docs/
+```
+
+### Infrastructure
+
+```bash
+# Generate Terraform for AWS
+saat generate-terraform -m architecture.json -p aws -r us-east-1 -o infrastructure/
+
+# Generate for Azure
+saat generate-terraform -m architecture.json -p azure -r eastus -o infrastructure/
+
+# Generate for GCP
+saat generate-terraform -m architecture.json -p gcp -r us-central1 -o infrastructure/
+```
+
+### Structurizr Integration
+
+```bash
+# Export to Structurizr JSON
+saat export-structurizr -m architecture.json -o structurizr.json
+
+# Import from Structurizr JSON
+saat import-structurizr -s structurizr.json -o architecture.json
+```
+
+### Global Options
+
+```bash
+# Auto-approve mode (skip all prompts)
+saat -y validate-model -m architecture.json
+saat --auto-approve generate-docs -m architecture.json
+
+# Use different model
+saat --model openai:gpt-4 analyze --path /repo
+
+# Set model via environment
+export SAAT_MODEL="openai:gpt-4"
+saat analyze --path /repo
+```
+
+### Utility Commands
 
 ```bash
 # Show version and configuration
 saat info
+
+# Get help
+saat --help
+saat analyze --help
 ```
 
 ---
 
-## 🐍 Programmatic Usage
+## 🎨 bac4-standalone Visual Editor Integration
 
-### Simple Analysis
+SAAT integrates with [bac4-standalone](https://github.com/DavidROliverBA/bac4-standalone) using the industry-standard **Structurizr JSON** format.
 
-```python
-import asyncio
-from saat import SAATClient
+### Why Integrate?
 
-async def main():
-    # Initialize client
-    client = SAATClient(model="anthropic:claude-sonnet-4")
+- **SAAT**: AI-powered analysis, validation, security, infrastructure generation
+- **bac4-standalone**: Interactive visual editing, drag-and-drop, real-time layout
+- **Together**: Best of both worlds - AI + human refinement
 
-    # Analyze repository
-    discovery, model = await client.analyze("/path/to/repo")
+### Complete Workflow
 
-    # Access results
-    print(f"Technologies: {discovery.technologies}")
-    print(f"Systems: {len(model.systems)}")
-    print(f"Containers: {len(model.containers)}")
-
-    # Save model
-    with open("architecture.json", "w") as f:
-        f.write(model.model_dump_json(indent=2))
-
-asyncio.run(main())
+```
+┌──────────────┐                    ┌─────────────────┐                    ┌──────────────┐
+│              │  Structurizr JSON  │                 │  Structurizr JSON  │              │
+│     SAAT     │ ───────────────►   │  bac4-standalone│ ───────────────►   │     SAAT     │
+│  (Analysis)  │                    │   (Visual Edit) │                    │ (Infra Gen)  │
+└──────────────┘                    └─────────────────┘                    └──────────────┘
 ```
 
-### Step-by-Step Analysis
-
-```python
-from saat import SAATClient
-from saat.models import BusinessContext, Stakeholder
-
-async def detailed_analysis():
-    client = SAATClient()
-
-    # Step 1: Discovery
-    discovery = await client.discover(
-        "/path/to/repo",
-        context="Focus on microservices architecture"
-    )
-
-    # Step 2: Create business context
-    business = BusinessContext(
-        purpose="E-commerce platform for B2B sales",
-        stakeholders=[
-            Stakeholder(
-                name="Sales Team",
-                role="Primary Users",
-                needs=["Fast order processing", "Customer insights"]
-            )
-        ],
-        capabilities=["Order Management", "Inventory", "Payments"]
-    )
-
-    # Step 3: Generate model
-    model = await client.generate_model(discovery, business)
-
-    # Step 4: Refine if needed
-    refined = await client.refine_model(
-        model,
-        "Add Redis cache container and update relationships"
-    )
-
-    return refined
-```
-
-### Using Individual Agents
-
-```python
-from saat.agents import DiscoveryAgent, GeneratorAgent
-
-async def use_agents():
-    # Discovery Agent
-    discovery_agent = DiscoveryAgent(model="anthropic:claude-sonnet-4")
-    discovery = await discovery_agent.analyze_repository("/path/to/repo")
-
-    # Generator Agent
-    generator_agent = GeneratorAgent(model="anthropic:claude-sonnet-4")
-    model = await generator_agent.generate_model(discovery)
-
-    return model
-```
-
-### Context Broker for Pipelines
-
-```python
-from saat.broker import ContextBroker
-from saat.models import Pipeline, PipelineStep
-
-async def run_pipeline():
-    broker = ContextBroker(model="anthropic:claude-sonnet-4")
-
-    # Define pipeline
-    pipeline = Pipeline(
-        name="full-analysis",
-        description="Discover and generate C4 model",
-        steps=[
-            PipelineStep(
-                name="discover",
-                agent="discovery",
-                task="analyze_repository",
-                required=True
-            ),
-            PipelineStep(
-                name="generate",
-                agent="generator",
-                task="generate_model",
-                depends_on=["discover"],
-                required=True
-            )
-        ]
-    )
-
-    # Execute pipeline
-    results = await broker.execute_pipeline(
-        pipeline,
-        initial_context={"repo_path": "/path/to/repo"}
-    )
-
-    return results
-```
-
----
-
-## 🏗️ Building from Scratch (Greenfield Projects)
-
-When starting a **new project from scratch**, SAAT becomes a powerful **design-first architecture tool**. Instead of discovering existing code, you design your ideal architecture upfront, validate it, and then implement following that validated design.
-
-### Why Design-First with SAAT?
-
-- ✅ **Validate Before You Build** - Catch architectural issues before writing code
-- ✅ **Generate Infrastructure** - Auto-create Terraform, docs, and ADRs from your design
-- ✅ **Enforce Standards** - Ensure compliance from day one
-- ✅ **Guide Implementation** - Developers follow a validated architecture blueprint
-- ✅ **Continuous Validation** - Verify implementation matches design as you build
-
-### Greenfield Workflow
-
-#### Phase 1: Design Your Architecture
-
-```python
-from saat.models import (
-    C4Model, SystemContext, Container, ExternalSystem,
-    Relationship, ModelMetadata, Interface, CriticalityLevel
-)
-from datetime import datetime
-
-# Create your architecture design
-architecture = C4Model(
-    version="1.0.0",
-    metadata=ModelMetadata(
-        project="Payment Processing Platform",
-        author="Architecture Team",
-        created=datetime.now(),
-        last_modified=datetime.now(),
-        description="Secure, scalable payment processing for B2B transactions",
-        tags=["fintech", "payments", "microservices"]
-    ),
-    systems=[
-        SystemContext(
-            id="SYS-PAYMENT-001",
-            name="Payment Processing Platform",
-            description="Handles all payment transactions and fraud detection",
-            criticality=CriticalityLevel.CS1,
-            responsibilities=[
-                "Process payment transactions",
-                "Detect fraudulent activity",
-                "Generate financial reports"
-            ],
-            owner="payments-team@company.com"
-        )
-    ],
-    containers=[
-        Container(
-            id="CON-API-001",
-            name="Payment API",
-            description="REST API for payment processing",
-            type="Container",
-            technology=["Python", "FastAPI", "Pydantic"],
-            system_id="SYS-PAYMENT-001",
-            criticality=CriticalityLevel.CS1,
-            interfaces=[
-                Interface(
-                    protocol="HTTPS",
-                    port=443,
-                    authentication="OAuth2 + mTLS",
-                    rate_limit="1000 req/min",
-                    encrypted=True
-                )
-            ],
-            responsibilities=[
-                "Accept payment requests",
-                "Validate payment data",
-                "Return transaction status"
-            ]
-        ),
-        Container(
-            id="CON-DB-001",
-            name="Transaction Database",
-            description="Primary transactional data store",
-            type="Database",
-            technology=["PostgreSQL 15"],
-            system_id="SYS-PAYMENT-001",
-            criticality=CriticalityLevel.CS1
-        )
-    ],
-    externals=[
-        ExternalSystem(
-            id="EXT-STRIPE-001",
-            name="Stripe Payment Gateway",
-            description="Third-party payment processing",
-            vendor="Stripe Inc.",
-            sla="99.99%"
-        )
-    ],
-    relationships=[
-        Relationship(
-            id="REL-001",
-            source="CON-API-001",
-            target="CON-DB-001",
-            description="Stores transaction data",
-            type="uses",
-            protocol="PostgreSQL",
-            synchronous=True
-        ),
-        Relationship(
-            id="REL-002",
-            source="CON-API-001",
-            target="EXT-STRIPE-001",
-            description="Processes payment",
-            type="uses",
-            protocol="HTTPS",
-            synchronous=True
-        )
-    ]
-)
-
-# Save design
-with open("payment-platform-design.json", "w") as f:
-    f.write(architecture.model_dump_json(indent=2))
-```
-
-#### Phase 2: Validate Your Design
+### Example
 
 ```bash
-# Validate design for correctness
-saat validate --model-file payment-platform-design.json
+# 1. Analyze code with SAAT
+saat analyze --path /my-payment-app -o architecture.json
+
+# 2. Export to Structurizr
+saat export-structurizr -m architecture.json -o structurizr.json
+
+# 3. Open bac4-standalone (web browser)
+#    → Import structurizr.json
+#    → Visually refine diagram
+#    → Export as structurizr-refined.json
+
+# 4. Import refined model
+saat import-structurizr -s structurizr-refined.json -o architecture-refined.json
+
+# 5. Generate infrastructure from refined model
+saat generate-terraform -m architecture-refined.json -p aws -o infrastructure/
+
+# 6. Deploy!
+cd infrastructure/
+terraform init
+terraform plan
+terraform apply
 ```
 
-#### Phase 3: Implement Following Design
+### Data Preservation
 
-Implement each container according to specifications:
+SAAT's rich metadata (criticality levels, interfaces, responsibilities) is preserved in the `properties` field during round-trip conversion.
 
-```python
-# services/payment-api/main.py
-# Built following CON-API-001 specification
-
-from fastapi import FastAPI, HTTPException
-import httpx
-
-app = FastAPI(title="Payment API")
-
-# From C4: Interface specification (HTTPS, port 443, OAuth2 + mTLS)
-@app.post("/transactions")
-async def create_transaction(transaction: TransactionRequest):
-    # Responsibility 1: Validate payment data
-    if not transaction.validate():
-        raise HTTPException(400, "Invalid transaction data")
-
-    # REL-001: Store in CON-DB-001 (PostgreSQL)
-    await db.transactions.create(transaction)
-
-    # REL-002: Process via EXT-STRIPE-001 (Stripe)
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "https://api.stripe.com/v1/charges",
-            headers={"Authorization": f"Bearer {STRIPE_KEY}"}
-        )
-
-    # Responsibility 3: Return transaction status
-    return {"id": transaction.id, "status": "processed"}
-
-# From C4: criticality CS1 requires health checks
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
-```
-
-#### Phase 4: Continuous Validation
-
-```bash
-# Discover actual implementation
-saat discover --path ./services --output actual.json
-
-# Compare with design (future feature)
-# saat compare --expected design.json --actual actual.json
-```
+**See**: [BAC4_INTEGRATION.md](BAC4_INTEGRATION.md) for complete guide.
 
 ---
 
-## 🔧 Refining & Improving Agents
+## 🔌 Claude Code Integration (MCP)
 
-### Extending Discovery Agent
+SAAT provides a Model Context Protocol (MCP) server for seamless Claude Code integration.
 
-Add support for new technologies:
+### Setup
 
-```python
-from saat.agents.discovery import DiscoveryAgent, DiscoveryDependencies
-from pydantic_ai import Agent, RunContext
+1. **Add to Claude Code config** (`~/.config/claude/config.json`):
 
-class CustomDiscoveryAgent(DiscoveryAgent):
-    """Extended discovery with Rust support."""
-
-    def __init__(self, model: str = "anthropic:claude-sonnet-4"):
-        super().__init__(model)
-
-        # Add custom tool
-        @self.agent.tool
-        async def discover_rust(ctx: RunContext[DiscoveryDependencies]) -> dict:
-            """Detect Rust projects."""
-            cargo_files = await ctx.deps.list_files("Cargo.toml")
-            if cargo_files:
-                return {"rust_detected": True, "cargo_files": cargo_files}
-            return {"rust_detected": False}
+```json
+{
+  "mcpServers": {
+    "saat": {
+      "command": "python",
+      "args": ["/path/to/SAAT/saat_mcp_server.py"],
+      "env": {
+        "ANTHROPIC_API_KEY": "${env:ANTHROPIC_API_KEY}"
+      }
+    }
+  }
+}
 ```
 
-### Extending Generator Agent
+2. **Restart Claude Code**
 
-Customize ID generation:
+3. **Use SAAT tools in Claude Code**:
 
-```python
-from saat.agents.generator import GeneratorAgent, GeneratorDependencies
+```
+You: I have a PRD in docs/requirements.md. Design the complete architecture.
 
-class CustomGeneratorAgent(GeneratorAgent):
-    """Generator with custom ID format."""
+Claude: I'll use SAAT to analyze your requirements and generate the architecture.
+[Uses discover_requirements tool]
+[Uses generate_c4_model tool]
+[Uses validate_model tool with PCI-DSS]
+[Uses security_scan tool]
+[Uses generate_terraform tool for AWS]
 
-    async def generate_model(self, discovery, business_context=None):
-        model = await super().generate_model(discovery, business_context)
+I've created:
+- Complete C4 architecture model (3 systems, 8 containers, 15 components)
+- Validation report: 98/100 (2 minor warnings)
+- Security analysis: 3 recommendations
+- AWS Terraform configuration (ready to deploy)
 
-        # Apply custom ID format: PROJ-TYPE-001
-        for i, system in enumerate(model.systems, 1):
-            system.id = f"PROJ-SYS-{i:03d}"
-
-        for i, container in enumerate(model.containers, 1):
-            container.id = f"PROJ-CON-{i:03d}"
-
-        return model
+Would you like me to show you any specific part?
 ```
 
-### Creating Custom Agents
+### Available MCP Tools
 
-```python
-from pydantic_ai import Agent
-from saat.models import C4Model, ValidationResult
+- `discover_architecture` - Analyze repository
+- `discover_requirements` - Extract requirements from documents
+- `generate_c4_model` - Generate architecture model
+- `validate_model` - Validate against standards
+- `analyze_security` - Security analysis
+- `generate_documentation` - Create docs
+- `generate_terraform` - Infrastructure-as-code
+- `full_analysis` - Complete end-to-end workflow
 
-def create_custom_validator() -> Agent[None, ValidationResult]:
-    """Create custom validation agent."""
-
-    agent = Agent(
-        "anthropic:claude-sonnet-4",
-        result_type=ValidationResult,
-        system_prompt="""You are a security-focused architecture validator.
-
-        Check for:
-        1. All external communications use HTTPS
-        2. Databases have encryption at rest
-        3. Authentication is properly configured
-        4. No hardcoded secrets in descriptions
-        """
-    )
-
-    @agent.tool
-    async def check_encryption(model: C4Model) -> dict:
-        """Check encryption settings."""
-        issues = []
-        for container in model.containers:
-            for interface in container.interfaces:
-                if not interface.encrypted:
-                    issues.append(f"{container.name} has unencrypted interface")
-        return {"encryption_issues": issues}
-
-    return agent
-```
+All tools use `auto_approve=True` for seamless integration.
 
 ---
 
-## 🌐 Model Support
+## 🎛️ Model Support
 
-SAAT supports **all models via PydanticAI**:
+SAAT supports multiple AI models via PydanticAI:
 
-### Anthropic Claude (Recommended)
+### Anthropic Claude (Default)
+
 ```bash
 export ANTHROPIC_API_KEY="your-key"
 saat --model anthropic:claude-sonnet-4 analyze --path /repo
+# or
 saat --model anthropic:claude-opus-4 analyze --path /repo
 ```
 
 ### OpenAI
+
 ```bash
-pip install -e ".[openai]"
 export OPENAI_API_KEY="your-key"
 saat --model openai:gpt-4 analyze --path /repo
+# or
 saat --model openai:gpt-4-turbo analyze --path /repo
 ```
 
 ### Google Gemini
+
 ```bash
-pip install -e ".[gemini]"
-export GOOGLE_API_KEY="your-key"
-saat --model gemini-1.5-pro analyze --path /repo
+export GEMINI_API_KEY="your-key"
+saat --model gemini:gemini-1.5-pro analyze --path /repo
 ```
 
 ### Local Models (Ollama)
+
 ```bash
-# Start Ollama server
+# Start Ollama
 ollama serve
 
-# Use local model
-saat --model ollama:llama2 analyze --path /repo
-saat --model ollama:codellama analyze --path /repo
+# Pull model
+ollama pull llama3.1
+
+# Use with SAAT
+saat --model ollama:llama3.1 analyze --path /repo
 ```
 
-### Other Providers
-PydanticAI supports: DeepSeek, Grok, Mistral, Cohere, Azure, AWS Bedrock, and more.
+### Set Default Model
+
+```bash
+# Via environment variable
+export SAAT_MODEL="anthropic:claude-sonnet-4"
+
+# Via .env file
+echo "SAAT_MODEL=anthropic:claude-sonnet-4" >> .env
+```
 
 ---
 
-## 📖 Best Practices
+## 💡 Examples
 
-### 1. Discovery Best Practices
+### Example 1: Brownfield - Analyze Payment App
 
-**DO:**
-- ✅ Run discovery on clean repositories (no build artifacts)
-- ✅ Provide business context for better results
-- ✅ Use `--max-depth` to limit exploration time
-- ✅ Review discovery results before generating models
+```bash
+cd /my-payment-app
 
-**DON'T:**
-- ❌ Analyze repositories with secrets or credentials
-- ❌ Skip the discovery step for accurate models
-- ❌ Ignore low confidence scores (< 0.7)
+# Analyze
+saat analyze --path . -o architecture.json
 
-### 2. Model Generation Best Practices
+# Validate PCI-DSS compliance
+saat validate-model -m architecture.json -f PCI-DSS -o validation.json
 
-**DO:**
-- ✅ Always provide business context when available
-- ✅ Review generated models for accuracy
-- ✅ Assign appropriate criticality levels
-- ✅ Validate models before using in production
+# Security scan
+saat security-scan -m architecture.json --threat-model -o security.json
 
-**DON'T:**
-- ❌ Accept models without validation
-- ❌ Ignore missing relationships
-- ❌ Skip criticality level assignment
+# Generate AWS infrastructure with compliance
+saat generate-terraform -m architecture.json -p aws -o infrastructure/
 
-### 3. Multi-Model Best Practices
-
-**DO:**
-- ✅ Use Claude Sonnet-4 for balanced performance
-- ✅ Use Claude Opus-4 for complex architectures
-- ✅ Try different models if results are unsatisfactory
-- ✅ Use local models for sensitive codebases
-
-**DON'T:**
-- ❌ Use smaller models for large, complex systems
-- ❌ Forget to set appropriate API keys
-- ❌ Mix models mid-analysis (use same model throughout)
-
-### 4. Production Best Practices
-
-**DO:**
-- ✅ Enable Logfire for observability
-- ✅ Set up monitoring and alerting
-- ✅ Version control your C4 models
-- ✅ Automate discovery in CI/CD
-- ✅ Document architectural decisions (ADRs)
-
-**DON'T:**
-- ❌ Run in production without error handling
-- ❌ Ignore API rate limits
-- ❌ Skip validation in pipelines
-
----
-
-## 📚 Examples
-
-### Example 1: Microservices Platform
-
-```python
-from saat import SAATClient
-
-client = SAATClient()
-
-# Analyze microservices
-discovery, model = await client.analyze("/path/to/microservices")
-
-# Check results
-print(f"Found {len(model.containers)} services")
-for container in model.containers:
-    print(f"  - {container.name} ({', '.join(container.technology)})")
+# Output:
+# ✅ architecture.json (C4 model)
+# ✅ validation.json (PCI-DSS compliance report)
+# ✅ security.json (Security issues + threat model)
+# ✅ infrastructure/ (Terraform with proper encryption, network isolation)
 ```
 
-### Example 2: With Business Context
+### Example 2: Greenfield - Design E-Commerce Platform
 
-```python
-from saat import SAATClient
-from saat.models import BusinessContext, ComplianceRequirement
+```bash
+# Extract requirements
+saat discover-requirements \\
+  -f docs/product-requirements.md \\
+  -f docs/technical-constraints.md \\
+  -n "E-Commerce Platform" \\
+  -o requirements.json
 
-business = BusinessContext(
-    purpose="Healthcare patient management system",
-    capabilities=["Patient Records", "Appointments", "Billing"],
-    compliance=[
-        ComplianceRequirement(
-            framework="HIPAA",
-            requirements=["Data encryption", "Audit logs", "Access controls"],
-            applicable=True
-        )
-    ]
-)
+# Review extracted requirements
+cat requirements.json | python -m json.tool
 
-client = SAATClient()
-discovery, model = await client.analyze("/path/to/repo", business_context=business)
+# Export for visual design (manual creation for now)
+# TODO: saat generate-from-requirements
 
-# Model will include HIPAA-aware criticality levels
-for container in model.containers:
-    print(f"{container.name}: {container.criticality}")
+# Validate
+saat validate-model -m architecture.json -f GDPR
+
+# Generate complete stack
+saat generate-docs -m architecture.json -f markdown -f plantuml -o docs/
+saat generate-terraform -m architecture.json -p aws -o infrastructure/
 ```
 
-### Example 3: Model Refinement
+### Example 3: Round-Trip with Visual Editor
 
-```python
-from saat import SAATClient
+```bash
+# Start with code analysis
+saat analyze --path /my-microservices -o architecture.json
 
-client = SAATClient()
+# Export to Structurizr
+saat export-structurizr -m architecture.json -o structurizr.json
 
-# Initial generation
-discovery, model = await client.analyze("/path/to/repo")
+# Edit in bac4-standalone
+# (Visual refinement, add missing systems, clarify relationships)
 
-# Refine based on feedback
-refined = await client.refine_model(
-    model,
-    """
-    Add these improvements:
-    1. Add Redis cache container (CS2 criticality)
-    2. Create relationship from API to Redis
-    3. Add monitoring container for observability
-    4. Update API container to include health check endpoint
-    """
-)
+# Import refined model
+saat import-structurizr -s structurizr-refined.json -o architecture-v2.json
 
-# Save refined model
-with open("architecture-v2.json", "w") as f:
-    f.write(refined.model_dump_json(indent=2))
+# Validate changes
+saat validate-model -m architecture-v2.json
+
+# Regenerate infrastructure with changes
+saat generate-terraform -m architecture-v2.json -p aws -o infrastructure-v2/
+```
+
+### Example 4: Full Automation
+
+```bash
+# Complete automated workflow
+saat -y analyze --path /repo -o architecture.json
+saat -y validate-model -m architecture.json -f PCI-DSS
+saat -y security-scan -m architecture.json --threat-model
+saat -y generate-docs -m architecture.json -f markdown -f plantuml
+saat -y generate-terraform -m architecture.json -p aws
+
+# All tasks run without prompts
 ```
 
 ---
 
 ## 🏛️ Architecture
 
-SAAT uses a **multi-agent architecture** powered by PydanticAI:
-
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         SAAT CLI                             │
-│                    (Click-based interface)                   │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      SAAT Client                             │
-│              (High-level programmatic API)                   │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Context Broker                            │
-│              (Pipeline orchestration layer)                  │
-└─────────┬────────────────────────────────────┬──────────────┘
-          │                                    │
-          ▼                                    ▼
-┌──────────────────────┐           ┌──────────────────────────┐
-│  Discovery Agent     │           │  Generator Agent         │
-│  (PydanticAI)        │           │  (PydanticAI)            │
-│                      │           │                          │
-│  - Analyze repos     │           │  - Create C4 models      │
-│  - Detect tech       │           │  - Assign criticality    │
-│  - Find patterns     │           │  - Infer relationships   │
-└──────────────────────┘           └──────────────────────────┘
+SAAT/
+├── saat/
+│   ├── models.py              # Pydantic models (C4, Requirements, Checklists)
+│   ├── structurizr.py         # Structurizr JSON models
+│   ├── converters.py          # SAAT ↔ Structurizr conversion
+│   ├── cli.py                 # Click CLI (12 commands)
+│   ├── client.py              # High-level API
+│   ├── broker.py              # Agent orchestration
+│   ├── agents/
+│   │   ├── base.py            # BaseAgentWithChecklist
+│   │   ├── discovery.py       # Code analysis (brownfield)
+│   │   ├── generator.py       # C4 model generation
+│   │   ├── requirements.py    # Requirements extraction (greenfield)
+│   │   ├── validation.py      # Compliance validation
+│   │   ├── documentation.py   # Multi-format documentation
+│   │   ├── security.py        # Security analysis & threat modeling
+│   │   └── terraform.py       # Infrastructure-as-code generation
+├── saat_mcp_server.py         # Claude Code MCP server
+├── examples/
+│   ├── quick_start.py         # Brownfield example
+│   ├── greenfield_project.py  # Greenfield example
+│   └── requirements.md        # Sample PRD
+├── BAC4_INTEGRATION.md        # bac4-standalone integration guide
+└── README.md                  # This file
 ```
 
-### Technology Stack
+---
 
-- **Framework**: PydanticAI
-- **Language**: Python 3.9+
-- **Validation**: Pydantic v2
-- **CLI**: Click
-- **Models**: Anthropic, OpenAI, Google, Ollama, etc.
-- **Observability**: Logfire (optional)
-- **Type Checking**: mypy
-- **Testing**: pytest
+## 📚 Documentation
+
+- **[BAC4_INTEGRATION.md](BAC4_INTEGRATION.md)** - Complete guide for bac4-standalone integration
+- **[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)** - Development roadmap
+- **[NEXT_STEPS.md](NEXT_STEPS.md)** - Future enhancements
+- **Examples**: See `examples/` directory
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how to get started:
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) (TODO).
+
+### Development Setup
 
 ```bash
-# 1. Clone and install
 git clone https://github.com/DavidROliverBA/SAAT.git
 cd SAAT
 poetry install
-
-# 2. Install dev dependencies
-poetry install --with dev
-
-# 3. Run tests
-poetry run pytest
-
-# 4. Format code
-poetry run black saat/
-poetry run ruff check saat/
-
-# 5. Type check
-poetry run mypy saat/
+poetry run pytest  # Run tests (TODO)
 ```
-
-### Areas for Contribution
-
-- 🔧 Implement remaining agents (Validation, Documentation, Security, Terraform)
-- 🌐 Add support for more model providers
-- 📊 Enhance observability and monitoring
-- 🧪 Increase test coverage
-- 📚 Improve documentation
-- 🎨 Create visualization tools for C4 models
 
 ---
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - See [LICENSE](LICENSE) file
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Built with [PydanticAI](https://ai.pydantic.dev/) by the Pydantic team
-- Inspired by the [C4 Model](https://c4model.com/) by Simon Brown
-- Powered by [Anthropic Claude](https://anthropic.com/), [OpenAI](https://openai.com/), and other LLM providers
+- **PydanticAI** - Agent framework
+- **C4 Model** - Architecture visualization methodology
+- **Structurizr** - JSON schema for C4 models
+- **bac4-standalone** - Visual C4 editor
 
 ---
 
-**Made with ❤️  by the SAAT team**
+## 📞 Support
+
+- **Issues**: https://github.com/DavidROliverBA/SAAT/issues
+- **Discussions**: https://github.com/DavidROliverBA/SAAT/discussions
+
+---
+
+**Built with ❤️ using PydanticAI**
