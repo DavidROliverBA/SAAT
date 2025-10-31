@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "saat"
-version = "2.0.0"
+version = "1.0.0"
 description = "Solution Architecture Agent Toolkit - AI-powered C4 architecture discovery and documentation using PydanticAI"
 authors = ["David R Oliver <david@example.com>"]
 license = "MIT"
@@ -9,7 +9,7 @@ homepage = "https://github.com/DavidROliverBA/SAAT"
 repository = "https://github.com/DavidROliverBA/SAAT"
 keywords = ["architecture", "c4", "ai", "agents", "pydantic", "documentation"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.9",
