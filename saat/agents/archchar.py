@@ -2381,23 +2381,185 @@ class ArchCharAnalysisAgent(BaseAgentWithChecklist):
         # Perform actual analysis
         deps = ArchCharDependencies(c4_model, archchar_input)
 
-        # For now, return a basic result (full implementation will analyze each characteristic)
-        # This is a skeleton that will be filled in with actual analysis
-        analyses = []
-        # TODO: Implement actual analysis for each characteristic
+        # Map characteristic names to tool prompts
+        tool_map = {
+            "Availability": "analyze the architecture for Availability",
+            "Scalability": "analyze the architecture for Scalability",
+            "Performance": "analyze the architecture for Performance",
+            "Security": "analyze the architecture for Security",
+            "Reliability": "analyze the architecture for Reliability",
+            "Fault Tolerance": "analyze the architecture for Fault Tolerance",
+            "Recoverability": "analyze the architecture for Recoverability",
+            "Maintainability": "analyze the architecture for Maintainability",
+            "Testability": "analyze the architecture for Testability",
+            "Deployability": "analyze the architecture for Deployability",
+            "Configurability": "analyze the architecture for Configurability",
+            "Extensibility": "analyze the architecture for Extensibility",
+            "Interoperability": "analyze the architecture for Interoperability",
+            "Usability": "analyze the architecture for Usability",
+        }
+
+        # Run analysis for each selected characteristic
+        analyses: list[CharacteristicAnalysis] = []
+        all_gaps: list[CharacteristicGap] = []
+        all_recommendations: list[CharacteristicRecommendation] = []
+
+        for char in selected_chars:
+            if char.name not in tool_map:
+                # Skip custom characteristics or unsupported ones
+                continue
+
+            try:
+                # Run the agent with the characteristic-specific prompt
+                result = await self.agent.run(
+                    tool_map[char.name],
+                    deps=deps,
+                )
+
+                # Extract gaps and recommendations from result
+                # The result.data should be the return value from the tool
+                analysis_data = result.data if hasattr(result, 'data') else {}
+
+                gaps_data = analysis_data.get("gaps", [])
+                recs_data = analysis_data.get("recommendations", [])
+
+                # Convert to model objects
+                gaps = [CharacteristicGap(**gap) for gap in gaps_data]
+                recommendations = [CharacteristicRecommendation(**rec) for rec in recs_data]
+
+                # Calculate score for this characteristic
+                score = calculate_score(gaps, char.rating)
+
+                # Create analysis result
+                analysis = CharacteristicAnalysis(
+                    characteristic_name=char.name,
+                    characteristic_rating=char.rating,
+                    is_top_characteristic=char.isTop,
+                    notes=char.notes,
+                    score=score,
+                    gaps=gaps,
+                    recommendations=recommendations,
+                    compliance_status="compliant" if score >= 90 else
+                                    "mostly_compliant" if score >= 70 else
+                                    "partially_compliant" if score >= 50 else
+                                    "non_compliant",
+                )
+
+                analyses.append(analysis)
+                all_gaps.extend(gaps)
+                all_recommendations.extend(recommendations)
+
+            except Exception as e:
+                # Log error but continue with other characteristics
+                print(f"Warning: Failed to analyze {char.name}: {e}")
+                continue
+
+        # Calculate overall score (weighted by rating)
+        if analyses:
+            total_weight = 0
+            weighted_score = 0
+            for analysis in analyses:
+                weight = {"critical": 4, "high": 3, "medium": 2, "low": 1}.get(
+                    analysis.characteristic_rating, 2
+                )
+                weighted_score += analysis.score * weight
+                total_weight += weight
+
+            overall_score = int(weighted_score / total_weight) if total_weight > 0 else 0
+        else:
+            overall_score = 0
+
+        # Identify critical and high priority gaps
+        critical_gaps = [g for g in all_gaps if g.severity == "critical"]
+        high_priority_gaps = [g for g in all_gaps if g.severity == "high"]
+
+        # Prioritize recommendations (critical and high priority, top 10)
+        priority_recs = [
+            r for r in all_recommendations
+            if r.priority in ["critical", "high"]
+        ]
+        priority_recs.sort(
+            key=lambda r: (0 if r.priority == "critical" else 1, r.implementation_effort),
+            reverse=False
+        )
+        top_recommendations = priority_recs[:10]
+
+        # Extract recommended patterns and technologies
+        patterns_set = set()
+        technologies_set = set()
+
+        for rec in all_recommendations:
+            if rec.pattern:
+                patterns_set.add(rec.pattern)
+            technologies_set.update(rec.technologies)
+
+        architecture_patterns_recommended = sorted(patterns_set)
+        technologies_recommended = sorted(technologies_set)
+
+        # Generate executive summary
+        critical_count = len(critical_gaps)
+        high_count = len(high_priority_gaps)
+        compliant_count = len([a for a in analyses if a.score >= 70])
+
+        summary_parts = [
+            f"Architecture analysis completed for {len(analyses)} characteristics.",
+            f"Overall compliance score: {overall_score}/100.",
+        ]
+
+        if overall_score >= 80:
+            summary_parts.append(
+                f"The architecture is well-aligned with the specified characteristics ({compliant_count}/{len(analyses)} compliant)."
+            )
+        elif overall_score >= 60:
+            summary_parts.append(
+                f"The architecture is partially aligned ({compliant_count}/{len(analyses)} compliant) with room for improvement."
+            )
+        else:
+            summary_parts.append(
+                f"The architecture needs significant improvements ({compliant_count}/{len(analyses)} compliant)."
+            )
+
+        if critical_count > 0:
+            summary_parts.append(
+                f"⚠️ {critical_count} critical gap{'s' if critical_count != 1 else ''} identified requiring immediate attention."
+            )
+
+        if high_count > 0:
+            summary_parts.append(
+                f"{high_count} high-priority gap{'s' if high_count != 1 else ''} should be addressed soon."
+            )
+
+        if top_recommendations:
+            summary_parts.append(
+                f"Top {len(top_recommendations)} recommendations provided with implementation guidance."
+            )
+
+        executive_summary = " ".join(summary_parts)
+
+        # Identify top characteristics with issues
+        top_char_analyses = [a for a in analyses if a.is_top_characteristic]
+        top_char_issues = [a for a in top_char_analyses if a.score < 70]
+
+        if top_char_issues:
+            summary_parts.append(
+                f"\n\nTop characteristics needing attention: {', '.join([a.characteristic_name for a in top_char_issues])}."
+            )
+            executive_summary = " ".join(summary_parts)
 
         return ArchCharAnalysisResult(
             project_name=archchar_input.projectName,
             architect=archchar_input.architect,
-            characteristics_analyzed=len(selected_chars),
-            overall_score=75,  # Placeholder
+            analysis_date=archchar_input.date,
+            notes=archchar_input.notes,
+            characteristics_analyzed=len(analyses),
+            overall_score=overall_score,
             analyses=analyses,
-            critical_gaps=[],
-            high_priority_gaps=[],
-            top_recommendations=[],
-            executive_summary="Analysis in progress...",
-            architecture_patterns_recommended=[],
-            technologies_recommended=[],
+            critical_gaps=critical_gaps,
+            high_priority_gaps=high_priority_gaps,
+            top_recommendations=top_recommendations,
+            executive_summary=executive_summary,
+            architecture_patterns_recommended=architecture_patterns_recommended,
+            technologies_recommended=technologies_recommended,
         )
 
 
@@ -2425,3 +2587,197 @@ async def analyze_architecture_characteristics(
     """
     agent = ArchCharAnalysisAgent(model_name)
     return await agent.analyze(c4_model, archchar_input, auto_approve)
+
+
+# ============================================================================
+# Report Generation Functions
+# ============================================================================
+
+
+def generate_markdown_report(result: ArchCharAnalysisResult) -> str:
+    """Generate detailed Markdown report from analysis result.
+
+    Args:
+        result: ArchCharAnalysisResult
+
+    Returns:
+        Markdown formatted report
+    """
+    lines = []
+
+    # Header
+    lines.append("# Architecture Characteristics Analysis Report")
+    lines.append("")
+    lines.append(f"**Project:** {result.project_name}")
+    lines.append(f"**Architect:** {result.architect}")
+    lines.append(f"**Analysis Date:** {result.analysis_date}")
+    lines.append("")
+
+    # Executive Summary
+    lines.append("## Executive Summary")
+    lines.append("")
+    lines.append(result.executive_summary)
+    lines.append("")
+
+    # Overall Score
+    lines.append("## Overall Compliance Score")
+    lines.append("")
+    score_bar = "█" * (result.overall_score // 5) + "░" * (20 - result.overall_score // 5)
+    lines.append(f"**{result.overall_score}/100** {score_bar}")
+    lines.append("")
+
+    # Critical Gaps
+    if result.critical_gaps:
+        lines.append(f"## ⚠️ Critical Gaps ({len(result.critical_gaps)})")
+        lines.append("")
+        for gap in result.critical_gaps:
+            lines.append(f"### {gap.area}")
+            lines.append(f"- **Issue:** {gap.issue}")
+            lines.append(f"- **Impact:** {gap.impact}")
+            if gap.current_state:
+                lines.append(f"- **Current State:** {gap.current_state}")
+            if gap.desired_state:
+                lines.append(f"- **Desired State:** {gap.desired_state}")
+            lines.append("")
+
+    # High Priority Gaps
+    if result.high_priority_gaps:
+        lines.append(f"## High Priority Gaps ({len(result.high_priority_gaps)})")
+        lines.append("")
+        for gap in result.high_priority_gaps:
+            lines.append(f"### {gap.area}")
+            lines.append(f"- **Issue:** {gap.issue}")
+            lines.append(f"- **Impact:** {gap.impact}")
+            lines.append("")
+
+    # Top Recommendations
+    if result.top_recommendations:
+        lines.append(f"## Top Recommendations ({len(result.top_recommendations)})")
+        lines.append("")
+        for i, rec in enumerate(result.top_recommendations, 1):
+            lines.append(f"### {i}. {rec.title}")
+            lines.append("")
+            lines.append(f"**Priority:** {rec.priority.upper()} | **Effort:** {rec.implementation_effort}")
+            lines.append("")
+            lines.append(f"**Description:** {rec.description}")
+            lines.append("")
+            if rec.pattern:
+                lines.append(f"**Pattern:** {rec.pattern}")
+            lines.append(f"**Technologies:** {', '.join(rec.technologies)}")
+            lines.append("")
+            lines.append(f"**Rationale:** {rec.rationale}")
+            lines.append("")
+            lines.append(f"**Trade-offs:** {rec.tradeoffs}")
+            lines.append("")
+            lines.append("**Implementation Steps:**")
+            for step in rec.implementation_steps:
+                lines.append(f"1. {step}")
+            lines.append("")
+
+    # Detailed Analysis by Characteristic
+    lines.append("## Detailed Analysis by Characteristic")
+    lines.append("")
+
+    # Sort analyses: top characteristics first, then by score
+    top_analyses = [a for a in result.analyses if a.is_top_characteristic]
+    other_analyses = [a for a in result.analyses if not a.is_top_characteristic]
+
+    top_analyses.sort(key=lambda a: a.score)
+    other_analyses.sort(key=lambda a: a.score)
+
+    all_analyses = top_analyses + other_analyses
+
+    for analysis in all_analyses:
+        top_badge = " 🌟 **[TOP 7]**" if analysis.is_top_characteristic else ""
+        lines.append(f"### {analysis.characteristic_name}{top_badge}")
+        lines.append("")
+        lines.append(f"**Rating:** {analysis.characteristic_rating.upper()} | "
+                    f"**Score:** {analysis.score}/100 | "
+                    f"**Status:** {analysis.compliance_status.replace('_', ' ').title()}")
+        lines.append("")
+
+        if analysis.notes:
+            lines.append(f"**Notes:** {analysis.notes}")
+            lines.append("")
+
+        if analysis.gaps:
+            lines.append(f"**Gaps Identified ({len(analysis.gaps)}):**")
+            lines.append("")
+            for gap in analysis.gaps:
+                lines.append(f"- **[{gap.severity.upper()}]** {gap.area}: {gap.issue}")
+            lines.append("")
+
+        if analysis.recommendations:
+            lines.append(f"**Recommendations ({len(analysis.recommendations)}):**")
+            lines.append("")
+            for rec in analysis.recommendations:
+                lines.append(f"- **{rec.title}** ({rec.priority} priority, {rec.implementation_effort} effort)")
+                lines.append(f"  - {rec.description}")
+            lines.append("")
+
+    # Architecture Patterns Recommended
+    if result.architecture_patterns_recommended:
+        lines.append("## Architecture Patterns Recommended")
+        lines.append("")
+        for pattern in result.architecture_patterns_recommended:
+            lines.append(f"- {pattern}")
+        lines.append("")
+
+    # Technologies Recommended
+    if result.technologies_recommended:
+        lines.append("## Technologies Recommended")
+        lines.append("")
+        # Group by category if possible, otherwise just list
+        for tech in result.technologies_recommended[:20]:  # Limit to top 20
+            lines.append(f"- {tech}")
+        if len(result.technologies_recommended) > 20:
+            lines.append(f"- ... and {len(result.technologies_recommended) - 20} more")
+        lines.append("")
+
+    # Footer
+    lines.append("---")
+    lines.append("")
+    lines.append("*Generated by SAAT Architecture Characteristics Analysis Agent*")
+    lines.append("*Based on Mark Richards' Architecture Characteristics Methodology*")
+
+    return "\n".join(lines)
+
+
+def export_json_report(result: ArchCharAnalysisResult) -> str:
+    """Export analysis result as JSON.
+
+    Args:
+        result: ArchCharAnalysisResult
+
+    Returns:
+        JSON string
+    """
+    return result.model_dump_json(indent=2)
+
+
+def save_report(
+    result: ArchCharAnalysisResult,
+    output_path: str | Path,
+    format: str = "markdown"
+) -> None:
+    """Save analysis report to file.
+
+    Args:
+        result: ArchCharAnalysisResult
+        output_path: Output file path
+        format: Report format ('markdown' or 'json')
+
+    Raises:
+        ValueError: If format is not supported
+    """
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    if format.lower() == "markdown":
+        content = generate_markdown_report(result)
+        path.write_text(content)
+    elif format.lower() == "json":
+        content = export_json_report(result)
+        path.write_text(content)
+    else:
+        raise ValueError(f"Unsupported format: {format}. Use 'markdown' or 'json'.")
