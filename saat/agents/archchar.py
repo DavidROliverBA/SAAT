@@ -1242,9 +1242,1020 @@ def create_archchar_agent(
 
         return {"gaps": gaps, "recommendations": recommendations}
 
-    # More tools will be added below...
-    # (Maintainability, Testability, Deployability,
-    #  Interoperability, Configurability, Extensibility, Usability)
+    # ========================================================================
+    # STRUCTURAL CHARACTERISTICS ANALYSIS TOOLS
+    # ========================================================================
+
+    @agent.tool
+    async def analyze_maintainability(ctx: RunContext[ArchCharDependencies]) -> dict[str, Any]:
+        """Analyze Maintainability against C4 model.
+
+        Evaluates:
+        - Code organization and modularity
+        - Documentation and naming conventions
+        - Technical debt indicators
+        - Coupling and cohesion
+
+        Returns:
+            Dict with 'gaps' and 'recommendations'
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Maintainability")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: Documentation containers
+        doc_containers = [c for c in model.containers if "doc" in c.name.lower() or "wiki" in c.name.lower()]
+
+        if not doc_containers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Documentation Infrastructure",
+                "issue": "No documentation infrastructure detected",
+                "severity": "medium",
+                "impact": "Lack of documentation slows onboarding and increases maintenance time.",
+                "current_state": "No dedicated documentation containers found",
+                "desired_state": "Documentation system with API docs, architecture diagrams, and runbooks"
+            })
+
+            recommendations.append({
+                "title": "Implement documentation infrastructure",
+                "description": "Set up automated API documentation and architecture documentation system.",
+                "pattern": "Documentation as Code",
+                "technologies": ["Swagger/OpenAPI", "Docusaurus", "Confluence", "MkDocs"],
+                "implementation_effort": "low",
+                "priority": "medium",
+                "rationale": "Good documentation significantly reduces maintenance time and improves team productivity.",
+                "tradeoffs": "Initial time investment, ongoing maintenance effort",
+                "implementation_steps": [
+                    "Set up API documentation with OpenAPI/Swagger",
+                    "Create architecture documentation repository",
+                    "Integrate docs generation into CI/CD pipeline",
+                    "Document deployment and operational procedures",
+                    "Establish documentation standards and templates"
+                ]
+            })
+
+        # Check 2: Modularity - excessive container dependencies
+        high_coupling_containers = []
+        for container in model.containers:
+            dependency_count = len([rel for rel in model.relationships
+                                  if rel.source == container.name])
+            if dependency_count > 5:  # Arbitrary threshold for high coupling
+                high_coupling_containers.append((container.name, dependency_count))
+
+        if high_coupling_containers and char.rating in ["critical", "high"]:
+            container_list = ", ".join([f"{name} ({count} deps)" for name, count in high_coupling_containers[:3]])
+            gaps.append({
+                "area": "Modularity and Coupling",
+                "issue": f"{len(high_coupling_containers)} containers have high coupling",
+                "severity": "medium" if char.rating == "high" else "high",
+                "impact": "High coupling makes changes risky and time-consuming, reducing maintainability.",
+                "current_state": f"Containers with high dependencies: {container_list}",
+                "desired_state": "Loosely coupled containers with clear, minimal dependencies"
+            })
+
+            recommendations.append({
+                "title": "Reduce coupling through interface segregation",
+                "description": "Apply Interface Segregation Principle and introduce abstraction layers to reduce coupling.",
+                "pattern": "Interface Segregation, Dependency Inversion",
+                "technologies": ["API Gateway", "Event Bus", "Service Mesh"],
+                "implementation_effort": "high",
+                "priority": char.rating,
+                "rationale": "Reducing coupling improves maintainability by allowing independent evolution of components.",
+                "tradeoffs": "Increased initial complexity, potential performance overhead from indirection",
+                "implementation_steps": [
+                    "Identify high-coupling containers",
+                    "Analyze dependencies and identify core vs peripheral",
+                    "Introduce abstraction layers (interfaces, events)",
+                    "Refactor direct dependencies to use abstractions",
+                    "Monitor coupling metrics over time"
+                ]
+            })
+
+        # Check 3: Monolithic containers
+        large_monolith = [c for c in model.containers
+                         if "monolith" in c.name.lower() or "legacy" in c.name.lower()]
+
+        if large_monolith and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Monolithic Architecture",
+                "issue": f"Monolithic containers detected: {', '.join([c.name for c in large_monolith])}",
+                "severity": "high" if char.rating == "critical" else "medium",
+                "impact": "Monoliths are harder to maintain, test, and evolve compared to modular architectures.",
+                "current_state": "Monolithic architecture pattern",
+                "desired_state": "Modular architecture with well-defined boundaries"
+            })
+
+            recommendations.append({
+                "title": "Consider gradual decomposition of monoliths",
+                "description": "Apply Strangler Fig pattern to gradually extract functionality from monoliths.",
+                "pattern": "Strangler Fig, Domain-Driven Design",
+                "technologies": ["API Gateway", "Service Mesh", "Domain Modeling"],
+                "implementation_effort": "high",
+                "priority": char.rating,
+                "rationale": "Modular architectures are easier to maintain, test, and evolve. Gradual approach reduces risk.",
+                "tradeoffs": "Long-term effort, temporary increase in complexity, dual maintenance",
+                "implementation_steps": [
+                    "Identify bounded contexts within monolith",
+                    "Select least-coupled context for extraction",
+                    "Create new service with well-defined API",
+                    "Route traffic through API gateway",
+                    "Gradually migrate functionality",
+                    "Monitor and iterate"
+                ]
+            })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
+    @agent.tool
+    async def analyze_testability(ctx: RunContext[ArchCharDependencies]) -> dict[str, Any]:
+        """Analyze Testability against C4 model.
+
+        Evaluates:
+        - Test infrastructure and automation
+        - Component isolation for testing
+        - Mock-friendly architecture
+        - Test environments
+
+        Returns:
+            Dict with 'gaps' and 'recommendations'
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Testability")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: CI/CD and test automation infrastructure
+        ci_cd_containers = [c for c in model.containers
+                           if any(keyword in c.name.lower()
+                                 for keyword in ["jenkins", "gitlab", "github actions", "ci", "cd", "pipeline"])]
+
+        if not ci_cd_containers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Test Automation Infrastructure",
+                "issue": "No CI/CD or test automation infrastructure detected",
+                "severity": "critical" if char.rating == "critical" else "high",
+                "impact": "Manual testing is slow, error-prone, and doesn't scale. Automated testing is essential for testability.",
+                "current_state": "No visible CI/CD infrastructure",
+                "desired_state": "Automated CI/CD pipeline with comprehensive test suites"
+            })
+
+            recommendations.append({
+                "title": "Implement CI/CD pipeline with automated testing",
+                "description": "Set up continuous integration with automated unit, integration, and E2E tests.",
+                "pattern": "Continuous Integration/Continuous Deployment",
+                "technologies": ["GitHub Actions", "GitLab CI", "Jenkins", "CircleCI"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Automated testing is fundamental to testability. CI/CD ensures tests run consistently.",
+                "tradeoffs": "Initial setup time, ongoing maintenance of test suites",
+                "implementation_steps": [
+                    "Select CI/CD platform",
+                    "Create pipeline configuration",
+                    "Set up test stages (unit, integration, E2E)",
+                    "Configure test reporting and coverage",
+                    "Implement quality gates",
+                    "Train team on pipeline usage"
+                ]
+            })
+
+        # Check 2: Database dependencies - tight coupling
+        database_containers = [c for c in model.containers
+                              if c.technology and "database" in c.technology.lower()]
+
+        tightly_coupled_to_db = []
+        for container in model.containers:
+            db_dependencies = [rel for rel in model.relationships
+                             if rel.source == container.name and
+                             any(db.name == rel.target for db in database_containers)]
+            if len(db_dependencies) > 0:
+                tightly_coupled_to_db.append(container.name)
+
+        if len(tightly_coupled_to_db) > 3 and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Database Coupling",
+                "issue": f"{len(tightly_coupled_to_db)} containers directly coupled to databases",
+                "severity": "medium",
+                "impact": "Tight database coupling makes testing difficult. Tests require database setup and are slow.",
+                "current_state": "Multiple containers with direct database dependencies",
+                "desired_state": "Repository pattern with testable interfaces, in-memory test databases"
+            })
+
+            recommendations.append({
+                "title": "Introduce repository pattern for testability",
+                "description": "Abstract database access behind interfaces to enable mocking and in-memory testing.",
+                "pattern": "Repository Pattern, Dependency Injection",
+                "technologies": ["Testcontainers", "H2 Database", "SQLite", "Mocking Frameworks"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Repository pattern enables fast, isolated unit tests without real database dependencies.",
+                "tradeoffs": "Additional abstraction layer, learning curve for team",
+                "implementation_steps": [
+                    "Define repository interfaces for data access",
+                    "Implement production repositories using real databases",
+                    "Implement test repositories using in-memory databases",
+                    "Use dependency injection to swap implementations",
+                    "Write tests using test repositories",
+                    "Consider Testcontainers for integration tests"
+                ]
+            })
+
+        # Check 3: External service dependencies
+        external_systems = [c for c in model.containers if c.external]
+
+        if len(external_systems) > 2 and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "External Dependencies",
+                "issue": f"{len(external_systems)} external system dependencies may hinder testing",
+                "severity": "medium",
+                "impact": "External dependencies make tests slow, flaky, and dependent on external availability.",
+                "current_state": f"External systems: {', '.join([s.name for s in external_systems[:5]])}",
+                "desired_state": "Mocked external dependencies, contract testing, service virtualization"
+            })
+
+            recommendations.append({
+                "title": "Implement service virtualization and contract testing",
+                "description": "Use mocks, stubs, and contract testing to isolate tests from external dependencies.",
+                "pattern": "Contract Testing, Service Virtualization",
+                "technologies": ["WireMock", "Pact", "Mountebank", "MockServer"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Service virtualization enables fast, reliable testing without external dependencies.",
+                "tradeoffs": "Effort to maintain mocks, risk of mock drift from real services",
+                "implementation_steps": [
+                    "Identify critical external service dependencies",
+                    "Set up service virtualization tool (WireMock, Pact)",
+                    "Create mock responses for common scenarios",
+                    "Implement contract tests to verify mocks",
+                    "Use mocks in development and testing environments",
+                    "Keep mocks synchronized with real services"
+                ]
+            })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
+    @agent.tool
+    async def analyze_deployability(ctx: RunContext[ArchCharDependencies]) -> dict[str, Any]:
+        """Analyze Deployability against C4 model.
+
+        Evaluates:
+        - CI/CD pipeline automation
+        - Containerization and orchestration
+        - Deployment frequency and risk
+        - Rollback capabilities
+
+        Returns:
+            Dict with 'gaps' and 'recommendations'
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Deployability")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: CI/CD infrastructure
+        ci_cd_containers = [c for c in model.containers
+                           if any(keyword in c.name.lower()
+                                 for keyword in ["jenkins", "gitlab", "github actions", "ci", "cd", "pipeline", "argocd", "spinnaker"])]
+
+        if not ci_cd_containers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "CI/CD Automation",
+                "issue": "No CI/CD pipeline infrastructure detected",
+                "severity": "critical" if char.rating == "critical" else "high",
+                "impact": "Manual deployments are slow, error-prone, and limit deployment frequency.",
+                "current_state": "No visible deployment automation",
+                "desired_state": "Fully automated CI/CD pipeline with quality gates"
+            })
+
+            recommendations.append({
+                "title": "Implement comprehensive CI/CD pipeline",
+                "description": "Build automated deployment pipeline with build, test, and deployment stages.",
+                "pattern": "Continuous Deployment, GitOps",
+                "technologies": ["GitHub Actions", "ArgoCD", "GitLab CI", "Jenkins", "Spinnaker"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Deployment automation is essential for frequent, reliable deployments.",
+                "tradeoffs": "Initial setup effort, learning curve for team",
+                "implementation_steps": [
+                    "Select CI/CD platform",
+                    "Define deployment pipeline stages",
+                    "Implement automated builds and tests",
+                    "Set up deployment to staging and production",
+                    "Configure approval gates for production",
+                    "Implement deployment notifications"
+                ]
+            })
+
+        # Check 2: Containerization and orchestration
+        orchestration_containers = [c for c in model.containers
+                                   if any(keyword in c.name.lower() or (c.technology and keyword in c.technology.lower())
+                                         for keyword in ["kubernetes", "k8s", "docker", "container", "ecs", "fargate"])]
+
+        if not orchestration_containers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Containerization and Orchestration",
+                "issue": "No container orchestration platform detected",
+                "severity": "high",
+                "impact": "Without containerization, deployments are harder to automate and less consistent across environments.",
+                "current_state": "No visible container orchestration",
+                "desired_state": "Containerized applications with orchestration (Kubernetes, ECS)"
+            })
+
+            recommendations.append({
+                "title": "Containerize applications with orchestration",
+                "description": "Package applications as containers and deploy with orchestration platform.",
+                "pattern": "Container Orchestration, Infrastructure as Code",
+                "technologies": ["Docker", "Kubernetes", "AWS ECS", "Google GKE", "Helm"],
+                "implementation_effort": "high",
+                "priority": char.rating,
+                "rationale": "Containerization enables consistent deployments, easy scaling, and better resource utilization.",
+                "tradeoffs": "Complexity increase, learning curve, operational overhead",
+                "implementation_steps": [
+                    "Create Dockerfiles for all services",
+                    "Set up container registry",
+                    "Select orchestration platform (K8s, ECS)",
+                    "Define deployment manifests/Helm charts",
+                    "Implement rolling deployment strategy",
+                    "Set up monitoring and logging for containers"
+                ]
+            })
+
+        # Check 3: Blue-green or canary deployment capability
+        # Look for load balancers or API gateways that could support advanced deployment
+        load_balancers = [c for c in model.containers
+                         if any(keyword in c.name.lower()
+                               for keyword in ["load balancer", "alb", "nginx", "traefik", "ingress"])]
+
+        if load_balancers and char.rating == "critical":
+            # Recommend advanced deployment strategies for critical deployability
+            recommendations.append({
+                "title": "Implement blue-green or canary deployments",
+                "description": "Use advanced deployment strategies to reduce deployment risk and enable easy rollback.",
+                "pattern": "Blue-Green Deployment, Canary Release",
+                "technologies": ["Kubernetes", "Istio", "AWS CodeDeploy", "Flagger", "Argo Rollouts"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Advanced deployment strategies minimize downtime and enable fast rollback if issues occur.",
+                "tradeoffs": "Increased complexity, requires twice the resources during deployment",
+                "implementation_steps": [
+                    "Set up multiple deployment slots (blue/green)",
+                    "Configure load balancer to route traffic",
+                    "Implement health checks and validation",
+                    "Automate traffic switching",
+                    "Define rollback procedures",
+                    "Consider progressive canary deployments"
+                ]
+            })
+
+        # Check 4: Feature flags for deployment decoupling
+        feature_flag_containers = [c for c in model.containers
+                                  if any(keyword in c.name.lower()
+                                        for keyword in ["feature flag", "launchdarkly", "split", "unleash", "flagsmith"])]
+
+        if not feature_flag_containers and char.rating in ["critical", "high"]:
+            recommendations.append({
+                "title": "Implement feature flag system",
+                "description": "Decouple deployment from release using feature flags to enable safer, more frequent deployments.",
+                "pattern": "Feature Toggles, Trunk-Based Development",
+                "technologies": ["LaunchDarkly", "Unleash", "Flagsmith", "Split.io"],
+                "implementation_effort": "low",
+                "priority": "medium",
+                "rationale": "Feature flags enable deploying code without activating features, reducing deployment risk.",
+                "tradeoffs": "Additional complexity in code, flag management overhead",
+                "implementation_steps": [
+                    "Select feature flag platform",
+                    "Integrate SDK into applications",
+                    "Define flag management processes",
+                    "Wrap new features in flags",
+                    "Implement gradual rollout capabilities",
+                    "Establish flag cleanup procedures"
+                ]
+            })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
+    @agent.tool
+    async def analyze_configurability(ctx: RunContext[ArchCharDependencies]) -> dict[str, Any]:
+        """Analyze Configurability against C4 model.
+
+        Evaluates:
+        - Configuration management systems
+        - Environment-specific configuration
+        - Feature flag infrastructure
+        - Secrets management
+
+        Returns:
+            Dict with 'gaps' and 'recommendations'
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Configurability")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: Configuration management infrastructure
+        config_containers = [c for c in model.containers
+                           if any(keyword in c.name.lower()
+                                 for keyword in ["config", "consul", "etcd", "spring cloud config", "zookeeper"])]
+
+        if not config_containers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Configuration Management",
+                "issue": "No centralized configuration management system detected",
+                "severity": "medium" if char.rating == "high" else "high",
+                "impact": "Without centralized config, environment-specific changes require redeployment.",
+                "current_state": "No visible configuration management infrastructure",
+                "desired_state": "Centralized configuration with environment-specific overrides"
+            })
+
+            recommendations.append({
+                "title": "Implement centralized configuration management",
+                "description": "Set up configuration server to externalize and centralize application configuration.",
+                "pattern": "Externalized Configuration, Configuration Server",
+                "technologies": ["Spring Cloud Config", "Consul", "etcd", "AWS Parameter Store", "Azure App Configuration"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Centralized configuration enables runtime changes without redeployment and simplifies environment management.",
+                "tradeoffs": "Additional infrastructure component, potential single point of failure",
+                "implementation_steps": [
+                    "Select configuration management solution",
+                    "Set up configuration server",
+                    "Migrate configuration from code to config server",
+                    "Implement environment-specific overrides",
+                    "Add configuration refresh capability",
+                    "Secure sensitive configuration values"
+                ]
+            })
+
+        # Check 2: Secrets management
+        secrets_containers = [c for c in model.containers
+                             if any(keyword in c.name.lower()
+                                   for keyword in ["vault", "secrets", "key management", "kms", "secrets manager"])]
+
+        if not secrets_containers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Secrets Management",
+                "issue": "No dedicated secrets management system detected",
+                "severity": "high",
+                "impact": "Secrets in configuration files or code pose security risks and limit configurability.",
+                "current_state": "No visible secrets management infrastructure",
+                "desired_state": "Secure secrets management with rotation capabilities"
+            })
+
+            recommendations.append({
+                "title": "Implement secrets management system",
+                "description": "Use dedicated secrets management to securely store and rotate sensitive configuration.",
+                "pattern": "Secrets Management, Vault Pattern",
+                "technologies": ["HashiCorp Vault", "AWS Secrets Manager", "Azure Key Vault", "Google Secret Manager"],
+                "implementation_effort": "medium",
+                "priority": "high",
+                "rationale": "Proper secrets management is essential for security and enables configuration without code changes.",
+                "tradeoffs": "Additional infrastructure, complexity in secret rotation",
+                "implementation_steps": [
+                    "Select secrets management solution",
+                    "Set up secrets vault",
+                    "Migrate secrets from config files to vault",
+                    "Integrate applications with vault SDK",
+                    "Implement secret rotation policies",
+                    "Audit secret access"
+                ]
+            })
+
+        # Check 3: Feature flag system
+        feature_flag_containers = [c for c in model.containers
+                                  if any(keyword in c.name.lower()
+                                        for keyword in ["feature flag", "launchdarkly", "split", "unleash", "flagsmith"])]
+
+        if not feature_flag_containers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Feature Management",
+                "issue": "No feature flag system for runtime feature control",
+                "severity": "low" if char.rating == "high" else "medium",
+                "impact": "Feature changes require redeployment instead of runtime configuration.",
+                "current_state": "No feature flag infrastructure",
+                "desired_state": "Feature flag system with runtime control and gradual rollout"
+            })
+
+            recommendations.append({
+                "title": "Add feature flag system for runtime control",
+                "description": "Implement feature flags to control feature availability without code deployment.",
+                "pattern": "Feature Toggles, Feature Management",
+                "technologies": ["LaunchDarkly", "Unleash", "Flagsmith", "Split.io", "ConfigCat"],
+                "implementation_effort": "low",
+                "priority": "medium",
+                "rationale": "Feature flags enable runtime feature control, A/B testing, and gradual rollouts.",
+                "tradeoffs": "Code complexity, flag management overhead, technical debt if not cleaned up",
+                "implementation_steps": [
+                    "Select feature flag platform",
+                    "Integrate SDK into applications",
+                    "Define flag naming conventions",
+                    "Implement flags for key features",
+                    "Set up user segmentation for targeting",
+                    "Establish flag retirement process"
+                ]
+            })
+
+        # Check 4: Environment awareness
+        # Infer from notes about multiple environments
+        if char.notes and ("environment" in char.notes.lower() or "dev" in char.notes.lower() or "staging" in char.notes.lower()):
+            recommendations.append({
+                "title": "Implement environment-aware configuration",
+                "description": "Ensure configuration system supports multiple environments with clear separation.",
+                "pattern": "Environment-Specific Configuration",
+                "technologies": ["Environment Variables", "Config Profiles", "Helm Values"],
+                "implementation_effort": "low",
+                "priority": char.rating,
+                "rationale": "Environment-specific configuration ensures proper separation and reduces deployment errors.",
+                "tradeoffs": "Complexity in managing multiple configurations",
+                "implementation_steps": [
+                    "Define environment naming conventions (dev, staging, prod)",
+                    "Create environment-specific configuration files",
+                    "Use environment variables for environment selection",
+                    "Validate configurations per environment",
+                    "Document configuration differences"
+                ]
+            })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
+    @agent.tool
+    async def analyze_extensibility(ctx: RunContext[ArchCharDependencies]) -> dict[str, Any]:
+        """Analyze Extensibility against C4 model.
+
+        Evaluates:
+        - Plugin architecture support
+        - API extensibility points
+        - Loose coupling for extensions
+        - Open/Closed principle adherence
+
+        Returns:
+            Dict with 'gaps' and 'recommendations'
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Extensibility")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: API Gateway for extensibility
+        api_gateways = [c for c in model.containers
+                       if any(keyword in c.name.lower()
+                             for keyword in ["api gateway", "gateway", "kong", "apigee", "ambassador"])]
+
+        if not api_gateways and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "API Extensibility",
+                "issue": "No API Gateway for managing extensibility points",
+                "severity": "medium",
+                "impact": "Without API Gateway, extending functionality and adding plugins is harder.",
+                "current_state": "No visible API Gateway infrastructure",
+                "desired_state": "API Gateway with plugin support and extension points"
+            })
+
+            recommendations.append({
+                "title": "Implement API Gateway with plugin support",
+                "description": "Use API Gateway to provide extensibility through plugins and custom filters.",
+                "pattern": "API Gateway, Plugin Architecture",
+                "technologies": ["Kong", "AWS API Gateway", "Apigee", "Tyk", "Ambassador"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "API Gateway provides central extensibility point for authentication, routing, and custom logic.",
+                "tradeoffs": "Additional infrastructure component, potential bottleneck",
+                "implementation_steps": [
+                    "Select API Gateway solution",
+                    "Deploy and configure gateway",
+                    "Define plugin architecture",
+                    "Migrate API routing to gateway",
+                    "Implement custom plugins as needed",
+                    "Document extension points for developers"
+                ]
+            })
+
+        # Check 2: Event-driven architecture for extensibility
+        message_brokers = [c for c in model.containers
+                          if any(keyword in c.name.lower() or (c.technology and keyword in c.technology.lower())
+                                for keyword in ["kafka", "rabbitmq", "event", "message", "pubsub", "sns", "sqs", "eventbridge"])]
+
+        if not message_brokers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Event-Driven Extensibility",
+                "issue": "No event-driven infrastructure for loose coupling and extension",
+                "severity": "medium" if char.rating == "high" else "high",
+                "impact": "Tight coupling limits ability to add new functionality without modifying existing code.",
+                "current_state": "No event bus or message broker detected",
+                "desired_state": "Event-driven architecture with publish/subscribe for extensibility"
+            })
+
+            recommendations.append({
+                "title": "Introduce event-driven architecture for extensibility",
+                "description": "Use event bus to enable loose coupling and allow new functionality via event subscribers.",
+                "pattern": "Event-Driven Architecture, Publish-Subscribe",
+                "technologies": ["Apache Kafka", "RabbitMQ", "AWS SNS/SQS", "Google Pub/Sub", "Azure Event Grid"],
+                "implementation_effort": "high",
+                "priority": char.rating,
+                "rationale": "Event-driven architecture enables adding new functionality without modifying existing services.",
+                "tradeoffs": "Increased complexity, eventual consistency, debugging challenges",
+                "implementation_steps": [
+                    "Select message broker/event bus",
+                    "Design event schema and versioning strategy",
+                    "Identify events to publish from existing services",
+                    "Implement event publishers",
+                    "Create extension services as event subscribers",
+                    "Implement dead letter queues and error handling"
+                ]
+            })
+
+        # Check 3: Microservices for modularity
+        service_count = len([c for c in model.containers if not c.external])
+
+        if service_count < 3 and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Modular Architecture",
+                "issue": "Limited modularity may hinder extensibility",
+                "severity": "medium",
+                "impact": "Monolithic architecture makes it harder to add functionality independently.",
+                "current_state": f"Only {service_count} internal containers/services",
+                "desired_state": "Modular architecture with clear service boundaries"
+            })
+
+            recommendations.append({
+                "title": "Consider modular architecture for extensibility",
+                "description": "Break down monolith into services with clear boundaries to enable independent extensions.",
+                "pattern": "Microservices, Domain-Driven Design",
+                "technologies": ["Service Mesh", "API Gateway", "Domain Modeling"],
+                "implementation_effort": "high",
+                "priority": char.rating,
+                "rationale": "Modular architecture allows adding new services/features without modifying existing code.",
+                "tradeoffs": "Increased operational complexity, distributed system challenges",
+                "implementation_steps": [
+                    "Identify bounded contexts using DDD",
+                    "Define service boundaries and APIs",
+                    "Extract services gradually (Strangler Fig)",
+                    "Ensure loose coupling between services",
+                    "Document extension patterns for new services"
+                ]
+            })
+
+        # Check 4: Webhook or callback support
+        if char.notes and ("webhook" in char.notes.lower() or "plugin" in char.notes.lower() or "integration" in char.notes.lower()):
+            recommendations.append({
+                "title": "Implement webhook system for extensibility",
+                "description": "Provide webhook endpoints to allow external systems to extend functionality.",
+                "pattern": "Webhook Pattern, Observer Pattern",
+                "technologies": ["Webhook Management", "API Callbacks", "Event Notifications"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Webhooks enable external systems and users to extend functionality without modifying core system.",
+                "tradeoffs": "Security considerations, retry logic complexity, monitoring overhead",
+                "implementation_steps": [
+                    "Design webhook event types",
+                    "Implement webhook registration API",
+                    "Build webhook delivery system with retries",
+                    "Add webhook authentication (signatures)",
+                    "Provide webhook testing tools",
+                    "Document webhook API and events"
+                ]
+            })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
+    # ========================================================================
+    # CROSS-CUTTING CHARACTERISTICS ANALYSIS TOOLS
+    # (Security already implemented above with operational characteristics)
+    # ========================================================================
+
+    @agent.tool
+    async def analyze_interoperability(ctx: RunContext[ArchCharDependencies]) -> dict[str, Any]:
+        """Analyze Interoperability against C4 model.
+
+        Evaluates:
+        - External system integrations
+        - API standards and protocols
+        - Data format compatibility
+        - Message brokers for integration
+
+        Returns:
+            Dict with 'gaps' and 'recommendations'
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Interoperability")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: External system integrations
+        external_systems = [c for c in model.containers if c.external]
+
+        if len(external_systems) > 0:
+            # Good - system has integrations, check for API Gateway
+            api_gateways = [c for c in model.containers
+                           if any(keyword in c.name.lower()
+                                 for keyword in ["api gateway", "gateway", "kong", "apigee"])]
+
+            if not api_gateways and len(external_systems) > 2:
+                gaps.append({
+                    "area": "Integration Management",
+                    "issue": f"{len(external_systems)} external integrations without centralized gateway",
+                    "severity": "medium",
+                    "impact": "Decentralized integrations are harder to monitor, secure, and manage.",
+                    "current_state": f"Multiple direct integrations: {', '.join([s.name for s in external_systems[:5]])}",
+                    "desired_state": "Centralized API Gateway managing external integrations"
+                })
+
+                recommendations.append({
+                    "title": "Centralize external integrations through API Gateway",
+                    "description": "Route external integrations through API Gateway for consistent security, monitoring, and transformation.",
+                    "pattern": "API Gateway, Integration Hub",
+                    "technologies": ["Kong", "Apigee", "AWS API Gateway", "MuleSoft"],
+                    "implementation_effort": "medium",
+                    "priority": char.rating,
+                    "rationale": "Centralized gateway provides consistent integration patterns, security, and observability.",
+                    "tradeoffs": "Additional infrastructure, potential bottleneck",
+                    "implementation_steps": [
+                        "Select API Gateway solution",
+                        "Define integration patterns and standards",
+                        "Migrate external integrations to gateway",
+                        "Implement rate limiting and security",
+                        "Add monitoring and logging",
+                        "Document integration guidelines"
+                    ]
+                })
+
+        # Check 2: Message broker for async integration
+        message_brokers = [c for c in model.containers
+                          if any(keyword in c.name.lower() or (c.technology and keyword in c.technology.lower())
+                                for keyword in ["kafka", "rabbitmq", "message", "event", "pubsub"])]
+
+        if len(external_systems) > 1 and not message_brokers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Asynchronous Integration",
+                "issue": "No message broker for asynchronous integration patterns",
+                "severity": "medium",
+                "impact": "Synchronous-only integration limits flexibility and creates tight coupling with external systems.",
+                "current_state": "No message broker detected",
+                "desired_state": "Message broker enabling asynchronous, decoupled integration"
+            })
+
+            recommendations.append({
+                "title": "Implement message broker for async integration",
+                "description": "Use message broker to enable asynchronous, resilient integration patterns.",
+                "pattern": "Message-Oriented Middleware, Event-Driven Integration",
+                "technologies": ["Apache Kafka", "RabbitMQ", "AWS SNS/SQS", "Azure Service Bus"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Asynchronous integration improves resilience, scalability, and decoupling from external systems.",
+                "tradeoffs": "Complexity, eventual consistency, message ordering challenges",
+                "implementation_steps": [
+                    "Select message broker technology",
+                    "Design message schemas and topics",
+                    "Implement publishers for outbound integration",
+                    "Implement consumers for inbound integration",
+                    "Add error handling and dead letter queues",
+                    "Monitor message flow and lag"
+                ]
+            })
+
+        # Check 3: API documentation and standards
+        # Look for OpenAPI/Swagger documentation
+        doc_indicators = any("swagger" in c.name.lower() or "openapi" in c.name.lower()
+                            for c in model.containers)
+
+        if not doc_indicators and len(external_systems) > 0:
+            recommendations.append({
+                "title": "Implement API documentation with OpenAPI/Swagger",
+                "description": "Use OpenAPI specification to document APIs for better interoperability.",
+                "pattern": "API Documentation, Contract-First Design",
+                "technologies": ["OpenAPI/Swagger", "Postman", "Stoplight", "Redoc"],
+                "implementation_effort": "low",
+                "priority": "medium",
+                "rationale": "Well-documented APIs improve interoperability by making integration easier for external systems.",
+                "tradeoffs": "Effort to maintain documentation in sync with code",
+                "implementation_steps": [
+                    "Define OpenAPI specification for all APIs",
+                    "Generate API documentation from spec",
+                    "Publish documentation to API portal",
+                    "Implement contract testing",
+                    "Keep documentation updated with changes"
+                ]
+            })
+
+        # Check 4: Data transformation and mapping
+        if len(external_systems) > 2 and char.rating in ["critical", "high"]:
+            recommendations.append({
+                "title": "Implement data transformation layer",
+                "description": "Use transformation layer to handle different data formats from external systems.",
+                "pattern": "Adapter Pattern, Data Transformation",
+                "technologies": ["Apache Camel", "Spring Integration", "MuleSoft", "ETL Tools"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Data transformation layer enables interoperability with diverse external systems using different formats.",
+                "tradeoffs": "Additional complexity, transformation overhead",
+                "implementation_steps": [
+                    "Identify data format requirements per integration",
+                    "Design canonical data model",
+                    "Implement adapters for each external system",
+                    "Add transformation logic (JSON, XML, CSV, etc.)",
+                    "Validate transformed data",
+                    "Monitor transformation errors"
+                ]
+            })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
+    @agent.tool
+    async def analyze_usability(ctx: RunContext[ArchCharDependencies]) -> dict[str, Any]:
+        """Analyze Usability against C4 model.
+
+        Evaluates:
+        - Frontend architecture
+        - CDN for performance
+        - Mobile support
+        - Accessibility considerations
+
+        Returns:
+            Dict with 'gaps' and 'recommendations'
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Usability")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: Frontend/UI containers
+        frontend_containers = [c for c in model.containers
+                              if any(keyword in c.name.lower()
+                                    for keyword in ["frontend", "ui", "web", "portal", "app", "client"])]
+
+        if not frontend_containers:
+            gaps.append({
+                "area": "User Interface",
+                "issue": "No frontend/UI containers detected",
+                "severity": "high" if char.rating in ["critical", "high"] else "medium",
+                "impact": "Without proper frontend architecture, usability will suffer.",
+                "current_state": "No visible frontend containers",
+                "desired_state": "Well-architected frontend with modern UX patterns"
+            })
+
+            recommendations.append({
+                "title": "Implement modern frontend architecture",
+                "description": "Build responsive, accessible frontend using modern frameworks and patterns.",
+                "pattern": "Single Page Application, Progressive Web App",
+                "technologies": ["React", "Vue", "Angular", "Next.js", "Svelte"],
+                "implementation_effort": "high",
+                "priority": char.rating,
+                "rationale": "Modern frontend architecture is essential for good usability and user experience.",
+                "tradeoffs": "Complexity, learning curve, build tooling overhead",
+                "implementation_steps": [
+                    "Select frontend framework",
+                    "Design component architecture",
+                    "Implement responsive layouts",
+                    "Add accessibility features (ARIA, keyboard nav)",
+                    "Implement progressive enhancement",
+                    "Optimize for performance (lazy loading, code splitting)"
+                ]
+            })
+
+        # Check 2: CDN for static content
+        cdn_containers = [c for c in model.containers
+                         if any(keyword in c.name.lower()
+                               for keyword in ["cdn", "cloudfront", "cloudflare", "akamai", "fastly"])]
+
+        if not cdn_containers and frontend_containers and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Content Delivery",
+                "issue": "No CDN detected for frontend static assets",
+                "severity": "medium",
+                "impact": "Without CDN, page load times will be slower, especially for global users, hurting usability.",
+                "current_state": "No CDN infrastructure",
+                "desired_state": "CDN serving static assets with edge caching"
+            })
+
+            recommendations.append({
+                "title": "Implement CDN for static content delivery",
+                "description": "Use CDN to serve static assets closer to users for faster page loads.",
+                "pattern": "Content Delivery Network, Edge Caching",
+                "technologies": ["CloudFront", "Cloudflare", "Akamai", "Fastly", "Azure CDN"],
+                "implementation_effort": "low",
+                "priority": "high",
+                "rationale": "CDN dramatically improves page load times, a key usability metric.",
+                "tradeoffs": "Additional cost, cache invalidation complexity",
+                "implementation_steps": [
+                    "Select CDN provider",
+                    "Configure CDN distribution",
+                    "Update asset URLs to CDN endpoints",
+                    "Set appropriate cache headers",
+                    "Implement cache invalidation strategy",
+                    "Monitor CDN performance and hit rates"
+                ]
+            })
+
+        # Check 3: Mobile considerations
+        mobile_containers = [c for c in model.containers
+                            if any(keyword in c.name.lower()
+                                  for keyword in ["mobile", "ios", "android", "react native", "flutter"])]
+
+        if not mobile_containers and char.notes and "mobile" in char.notes.lower():
+            gaps.append({
+                "area": "Mobile Support",
+                "issue": "Mobile support mentioned in notes but no mobile architecture detected",
+                "severity": "medium" if char.rating == "high" else "high",
+                "impact": "Growing mobile usage demands mobile-optimized experience.",
+                "current_state": "No mobile-specific containers detected",
+                "desired_state": "Responsive web or native mobile apps"
+            })
+
+            recommendations.append({
+                "title": "Implement mobile-first responsive design or native apps",
+                "description": "Ensure excellent mobile experience through responsive web or native mobile apps.",
+                "pattern": "Mobile-First Design, Progressive Web App",
+                "technologies": ["React Native", "Flutter", "PWA", "Responsive CSS", "Mobile-First Frameworks"],
+                "implementation_effort": "high",
+                "priority": char.rating,
+                "rationale": "Mobile users expect optimized experiences. Mobile-first design improves usability for all users.",
+                "tradeoffs": "Development effort, testing complexity across devices",
+                "implementation_steps": [
+                    "Analyze mobile usage patterns",
+                    "Choose approach (responsive web vs native)",
+                    "Design mobile-first UI/UX",
+                    "Implement responsive breakpoints",
+                    "Test across devices and screen sizes",
+                    "Optimize for touch interactions and mobile performance"
+                ]
+            })
+
+        # Check 4: Accessibility
+        if char.notes and ("accessibility" in char.notes.lower() or "wcag" in char.notes.lower() or "a11y" in char.notes.lower()):
+            recommendations.append({
+                "title": "Ensure accessibility compliance (WCAG 2.1)",
+                "description": "Implement accessibility best practices to ensure usability for all users.",
+                "pattern": "Accessible Design, WCAG Compliance",
+                "technologies": ["ARIA", "Accessibility Testing Tools", "Screen Readers", "axe-core"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Accessibility improves usability for everyone and is often legally required.",
+                "tradeoffs": "Additional development and testing effort",
+                "implementation_steps": [
+                    "Audit current accessibility status",
+                    "Implement semantic HTML",
+                    "Add ARIA labels and roles",
+                    "Ensure keyboard navigation support",
+                    "Test with screen readers",
+                    "Implement automated accessibility testing in CI/CD",
+                    "Achieve WCAG 2.1 AA compliance minimum"
+                ]
+            })
+
+        # Check 5: Performance monitoring for UX
+        monitoring_containers = [c for c in model.containers
+                                if any(keyword in c.name.lower()
+                                      for keyword in ["monitoring", "observability", "rum", "analytics"])]
+
+        if frontend_containers and not any("rum" in c.name.lower() or "analytics" in c.name.lower()
+                                          for c in monitoring_containers):
+            recommendations.append({
+                "title": "Implement Real User Monitoring (RUM)",
+                "description": "Add RUM to track actual user experience metrics like page load time and interactivity.",
+                "pattern": "Real User Monitoring, Performance Monitoring",
+                "technologies": ["New Relic Browser", "Datadog RUM", "Google Analytics", "Sentry Performance"],
+                "implementation_effort": "low",
+                "priority": "medium",
+                "rationale": "RUM provides actual user experience data to identify and fix usability issues.",
+                "tradeoffs": "Small performance overhead, privacy considerations",
+                "implementation_steps": [
+                    "Select RUM solution",
+                    "Integrate JavaScript agent",
+                    "Configure key metrics (Core Web Vitals)",
+                    "Set up alerts for poor performance",
+                    "Create dashboards for UX metrics",
+                    "Regularly review and act on insights"
+                ]
+            })
+
+        return {"gaps": gaps, "recommendations": recommendations}
 
     return agent
 
