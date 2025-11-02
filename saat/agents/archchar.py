@@ -666,10 +666,585 @@ def create_archchar_agent(
 
         return {"gaps": gaps, "recommendations": recommendations}
 
+    @agent.tool
+    async def analyze_security(
+        ctx: RunContext[ArchCharDependencies],
+    ) -> dict[str, Any]:
+        """Analyze Security characteristic against C4 model.
+
+        Evaluates:
+        - Authentication mechanisms
+        - Authorization controls
+        - Encryption (at rest and in transit)
+        - API security
+        - Secrets management
+        - Compliance requirements
+
+        Args:
+            ctx: Agent context
+
+        Returns:
+            Dictionary with gaps and recommendations
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Security")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: HTTPS/TLS encryption
+        http_interfaces = []
+        for container in model.containers:
+            for interface in container.interfaces:
+                if interface.protocol and "http" in interface.protocol.lower() and "https" not in interface.protocol.lower():
+                    http_interfaces.append((container.name, interface.port))
+
+        if http_interfaces:
+            gaps.append({
+                "area": "Encryption in Transit",
+                "issue": f"Unencrypted HTTP detected on {len(http_interfaces)} interfaces",
+                "severity": "critical" if char.rating == "critical" else "high",
+                "impact": "Data transmitted in cleartext can be intercepted. Security and compliance risk.",
+                "current_state": f"HTTP protocol on ports: {', '.join(str(p) for _, p in http_interfaces[:3])}",
+                "desired_state": "HTTPS/TLS for all external communication"
+            })
+
+            recommendations.append({
+                "title": "Enforce HTTPS/TLS for all communication",
+                "description": "Configure TLS/SSL certificates and enforce HTTPS for all external interfaces.",
+                "pattern": "TLS Everywhere",
+                "technologies": ["TLS/SSL Certificates", "Let's Encrypt", "AWS ACM", "Load Balancer SSL Termination"],
+                "implementation_effort": "low",
+                "priority": char.rating,
+                "rationale": "Encryption in transit is fundamental for security. Required for compliance (PCI-DSS, HIPAA, GDPR).",
+                "tradeoffs": "Minimal - slight performance overhead, certificate management",
+                "implementation_steps": [
+                    "Obtain SSL/TLS certificates",
+                    "Configure HTTPS on load balancers/ingress",
+                    "Redirect HTTP to HTTPS",
+                    "Enforce HTTPS in application",
+                    "Set up certificate renewal automation"
+                ]
+            })
+
+        # Check 2: API Gateway / Authentication layer
+        has_api_gateway = any(
+            "api gateway" in c.name.lower() or "gateway" in " ".join(c.technology).lower()
+            for c in model.containers
+        )
+
+        has_auth_service = any(
+            any(auth in c.name.lower() or auth in " ".join(c.technology).lower() for auth in ["auth", "identity", "cognito", "oauth"])
+            for c in model.containers
+        )
+
+        if not has_api_gateway and not has_auth_service and len(model.containers) > 2:
+            gaps.append({
+                "area": "Authentication & Authorization",
+                "issue": "No centralized authentication/API gateway detected",
+                "severity": "critical" if char.rating == "critical" else "high",
+                "impact": "Each service must implement own authentication. Inconsistent security controls.",
+                "current_state": "No centralized auth mechanism visible",
+                "desired_state": "API Gateway with centralized authentication"
+            })
+
+            recommendations.append({
+                "title": "Implement API Gateway with authentication",
+                "description": "Deploy API Gateway to centralize authentication, authorization, and API security controls.",
+                "pattern": "API Gateway Pattern",
+                "technologies": ["AWS API Gateway", "Kong", "Azure API Management", "OAuth2/OIDC"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "API Gateway provides single point for security controls, reducing attack surface and ensuring consistency.",
+                "tradeoffs": "Additional component, potential single point of failure (mitigate with HA)",
+                "implementation_steps": [
+                    "Deploy API Gateway in front of services",
+                    "Integrate with identity provider (OAuth2/OIDC)",
+                    "Configure authentication policies",
+                    "Implement rate limiting and throttling",
+                    "Set up API keys and access controls",
+                    "Configure WAF rules"
+                ]
+            })
+
+        # Check 3: Secrets management
+        has_secrets_mgmt = any(
+            any(sm in " ".join(c.technology).lower() for sm in ["vault", "secrets manager", "key vault"])
+            for c in model.containers
+        )
+
+        if not has_secrets_mgmt and char.rating in ["critical", "high"]:
+            gaps.append({
+                "area": "Secrets Management",
+                "issue": "No secrets management system detected",
+                "severity": "high",
+                "impact": "Secrets may be stored in code, config files, or environment variables. Security risk.",
+                "current_state": "Secrets management approach unclear",
+                "desired_state": "Centralized secrets management with encryption and rotation"
+            })
+
+            recommendations.append({
+                "title": "Implement secrets management system",
+                "description": "Deploy secrets management to securely store and rotate credentials, API keys, and certificates.",
+                "pattern": "Secrets Management",
+                "technologies": ["HashiCorp Vault", "AWS Secrets Manager", "Azure Key Vault", "GCP Secret Manager"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Proper secrets management prevents credential exposure and enables rotation without code changes.",
+                "tradeoffs": "Additional infrastructure, application changes needed",
+                "implementation_steps": [
+                    "Deploy secrets management service",
+                    "Migrate secrets from code/config to secrets store",
+                    "Integrate applications with secrets API",
+                    "Implement secret rotation policies",
+                    "Set up audit logging for secret access"
+                ]
+            })
+
+        # Check 4: Database encryption
+        database_containers = [
+            c for c in model.containers
+            if any(db in " ".join(c.technology).lower() for db in ["database", "postgres", "mysql", "mongo"])
+        ]
+
+        for db in database_containers:
+            if db.criticality in ["CS1", "CS2"]:
+                tech_str = " ".join(db.technology).lower()
+                if "encrypt" not in tech_str:
+                    gaps.append({
+                        "area": f"Database Encryption: {db.name}",
+                        "issue": "Database encryption at rest not explicitly configured",
+                        "severity": "high" if char.rating == "critical" else "medium",
+                        "impact": "Data at rest vulnerable if physical storage compromised. Compliance risk.",
+                        "current_state": "Encryption status unknown",
+                        "desired_state": "Encryption at rest enabled for all critical databases"
+                    })
+
+        if any("encrypt" not in " ".join(db.technology).lower() for db in database_containers if db.criticality in ["CS1", "CS2"]):
+            recommendations.append({
+                "title": "Enable database encryption at rest",
+                "description": "Enable encryption at rest for all critical databases to protect data at storage level.",
+                "pattern": "Encryption at Rest",
+                "technologies": ["AWS RDS Encryption", "Azure SQL TDE", "MongoDB Encryption"],
+                "implementation_effort": "low",
+                "priority": char.rating,
+                "rationale": "Encryption at rest is compliance requirement (PCI-DSS, HIPAA) and protects against physical theft.",
+                "tradeoffs": "Minimal performance impact, slight storage overhead",
+                "implementation_steps": [
+                    "Enable encryption for new databases",
+                    "Plan migration for existing databases",
+                    "Manage encryption keys properly",
+                    "Document encryption implementation"
+                ]
+            })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
+    @agent.tool
+    async def analyze_reliability(
+        ctx: RunContext[ArchCharDependencies],
+    ) -> dict[str, Any]:
+        """Analyze Reliability characteristic against C4 model.
+
+        Evaluates:
+        - Error handling
+        - Retry logic
+        - Transaction management
+        - Data consistency
+        - Monitoring and alerting
+
+        Args:
+            ctx: Agent context
+
+        Returns:
+            Dictionary with gaps and recommendations
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Reliability")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: Monitoring and observability
+        has_monitoring = any(
+            any(mon in " ".join(c.technology).lower() for mon in ["monitor", "prometheus", "datadog", "cloudwatch", "grafana"])
+            for c in model.containers
+        )
+
+        if not has_monitoring:
+            gaps.append({
+                "area": "Monitoring & Observability",
+                "issue": "No monitoring system detected",
+                "severity": "high" if char.rating in ["critical", "high"] else "medium",
+                "impact": "Cannot detect failures or performance issues. Poor visibility into system health.",
+                "current_state": "No centralized monitoring",
+                "desired_state": "Comprehensive monitoring with metrics, logs, and traces"
+            })
+
+            recommendations.append({
+                "title": "Implement comprehensive monitoring",
+                "description": "Deploy monitoring solution to track metrics, logs, and traces across all services.",
+                "pattern": "Observability Pattern",
+                "technologies": ["Prometheus + Grafana", "Datadog", "AWS CloudWatch", "Azure Monitor"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Monitoring is essential for detecting and resolving reliability issues quickly.",
+                "tradeoffs": "Additional infrastructure cost, requires instrumentation",
+                "implementation_steps": [
+                    "Deploy monitoring infrastructure",
+                    "Instrument applications with metrics",
+                    "Set up log aggregation",
+                    "Implement distributed tracing",
+                    "Create dashboards for key metrics",
+                    "Configure alerts for critical issues"
+                ]
+            })
+
+        # Check 2: Message queues for reliable async processing
+        has_queue = any(
+            any(q in " ".join(c.technology).lower() for q in ["queue", "kafka", "rabbitmq", "sqs"])
+            for c in model.containers
+        )
+
+        if not has_queue and len(model.containers) > 3:
+            gaps.append({
+                "area": "Reliable Messaging",
+                "issue": "No message queue detected for reliable async processing",
+                "severity": "medium",
+                "impact": "Risk of message loss in async operations. No guaranteed delivery.",
+                "current_state": "No reliable messaging infrastructure",
+                "desired_state": "Message queue with delivery guarantees and retry logic"
+            })
+
+            recommendations.append({
+                "title": "Add message queue for reliable async processing",
+                "description": "Implement message queue to ensure reliable delivery of async operations.",
+                "pattern": "Reliable Messaging",
+                "technologies": ["RabbitMQ", "Apache Kafka", "AWS SQS", "Azure Service Bus"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Message queues provide reliable async communication with delivery guarantees and retry capabilities.",
+                "tradeoffs": "Additional complexity, requires message handling logic",
+                "implementation_steps": [
+                    "Deploy message broker with HA configuration",
+                    "Implement message producers and consumers",
+                    "Configure dead letter queues for failed messages",
+                    "Set up retry policies with exponential backoff",
+                    "Monitor queue depths and processing rates"
+                ]
+            })
+
+        # Check 3: Database transactions
+        database_containers = [
+            c for c in model.containers
+            if any(db in " ".join(c.technology).lower() for db in ["database", "postgres", "mysql", "sql"])
+        ]
+
+        if database_containers:
+            gaps.append({
+                "area": "Data Consistency",
+                "issue": "Transaction management and data consistency patterns should be verified",
+                "severity": "medium",
+                "impact": "Risk of data inconsistency in failure scenarios.",
+                "current_state": "Transaction handling approach unclear",
+                "desired_state": "ACID transactions or compensating transactions for distributed systems"
+            })
+
+            recommendations.append({
+                "title": "Ensure proper transaction management",
+                "description": "Verify ACID transactions for databases and consider Saga pattern for distributed transactions.",
+                "pattern": "Transaction Management / Saga Pattern",
+                "technologies": ["Database Transactions", "Saga Pattern", "Event Sourcing"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Proper transaction management ensures data consistency and system reliability.",
+                "tradeoffs": "Saga pattern adds complexity, eventual consistency considerations",
+                "implementation_steps": [
+                    "Use database transactions for single-database operations",
+                    "Implement Saga pattern for distributed transactions",
+                    "Add compensating transactions for rollback",
+                    "Ensure idempotency in operations",
+                    "Test failure scenarios thoroughly"
+                ]
+            })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
+    @agent.tool
+    async def analyze_fault_tolerance(
+        ctx: RunContext[ArchCharDependencies],
+    ) -> dict[str, Any]:
+        """Analyze Fault Tolerance characteristic against C4 model.
+
+        Evaluates:
+        - Circuit breakers
+        - Bulkheads
+        - Timeouts
+        - Graceful degradation
+        - Failure isolation
+
+        Args:
+            ctx: Agent context
+
+        Returns:
+            Dictionary with gaps and recommendations
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Fault Tolerance")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: Service mesh or resilience library
+        has_service_mesh = any(
+            any(sm in " ".join(c.technology).lower() for sm in ["istio", "linkerd", "consul", "service mesh"])
+            for c in model.containers
+        )
+
+        has_resilience_lib = any(
+            any(rl in " ".join(c.technology).lower() for rl in ["hystrix", "resilience4j", "polly"])
+            for c in model.containers
+        )
+
+        if not has_service_mesh and not has_resilience_lib and len(model.containers) > 2:
+            gaps.append({
+                "area": "Circuit Breakers & Resilience",
+                "issue": "No service mesh or resilience library detected",
+                "severity": "high" if char.rating in ["critical", "high"] else "medium",
+                "impact": "Cascading failures can bring down entire system. No automatic fault isolation.",
+                "current_state": "No circuit breaker or resilience patterns visible",
+                "desired_state": "Circuit breakers, timeouts, and retry logic for all service-to-service calls"
+            })
+
+            recommendations.append({
+                "title": "Implement circuit breaker pattern",
+                "description": "Add circuit breakers to prevent cascading failures and isolate faults.",
+                "pattern": "Circuit Breaker Pattern",
+                "technologies": ["Service Mesh (Istio, Linkerd)", "Resilience4j", "Netflix Hystrix", "Polly"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Circuit breakers prevent cascading failures by stopping calls to failing services, allowing them to recover.",
+                "tradeoffs": "Requires careful configuration of thresholds and timeouts",
+                "implementation_steps": [
+                    "Deploy service mesh OR integrate resilience library",
+                    "Configure circuit breaker thresholds",
+                    "Implement timeout policies for all external calls",
+                    "Add retry logic with exponential backoff",
+                    "Monitor circuit breaker states",
+                    "Test failure scenarios"
+                ]
+            })
+
+        # Check 2: Bulkhead pattern (resource isolation)
+        critical_containers = [c for c in model.containers if c.criticality in ["CS1", "CS2"]]
+
+        if critical_containers and not has_service_mesh:
+            gaps.append({
+                "area": "Failure Isolation (Bulkheads)",
+                "issue": "No bulkhead pattern detected for resource isolation",
+                "severity": "medium",
+                "impact": "Failure in one service can exhaust shared resources, affecting all services.",
+                "current_state": "Shared resources without isolation",
+                "desired_state": "Resource pools isolated per service or client"
+            })
+
+            recommendations.append({
+                "title": "Implement bulkhead pattern for resource isolation",
+                "description": "Isolate thread pools, connections, and resources to prevent one failure from affecting others.",
+                "pattern": "Bulkhead Pattern",
+                "technologies": ["Thread Pool Isolation", "Connection Pool per Service", "Container Resource Limits"],
+                "implementation_effort": "medium",
+                "priority": char.rating,
+                "rationale": "Bulkheads prevent resource exhaustion in one area from affecting the entire system.",
+                "tradeoffs": "Resource overhead from multiple isolated pools",
+                "implementation_steps": [
+                    "Create separate thread pools for different operations",
+                    "Isolate connection pools per downstream service",
+                    "Set container resource limits (CPU, memory)",
+                    "Configure queue depths and timeouts",
+                    "Monitor resource utilization per pool"
+                ]
+            })
+
+        # Check 3: Health checks
+        gaps.append({
+            "area": "Health Monitoring",
+            "issue": "Health check endpoints should be verified",
+            "severity": "medium",
+            "impact": "Cannot detect service health automatically for traffic routing.",
+            "current_state": "Health check implementation unclear",
+            "desired_state": "Health check endpoints on all services for automated monitoring"
+        })
+
+        recommendations.append({
+            "title": "Implement comprehensive health checks",
+            "description": "Add health check endpoints to all services for monitoring and load balancer integration.",
+            "pattern": "Health Check Pattern",
+            "technologies": ["HTTP Health Endpoints", "Kubernetes Liveness/Readiness Probes"],
+            "implementation_effort": "low",
+            "priority": char.rating,
+            "rationale": "Health checks enable automatic detection and routing away from unhealthy instances.",
+            "tradeoffs": "Minimal - slight overhead from health check requests",
+            "implementation_steps": [
+                "Implement /health endpoint on all services",
+                "Check critical dependencies (database, cache)",
+                "Configure load balancer health checks",
+                "Set up Kubernetes probes if applicable",
+                "Monitor health check failures"
+            ]
+        })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
+    @agent.tool
+    async def analyze_recoverability(
+        ctx: RunContext[ArchCharDependencies],
+    ) -> dict[str, Any]:
+        """Analyze Recoverability characteristic against C4 model.
+
+        Evaluates:
+        - Backup strategy
+        - RTO (Recovery Time Objective)
+        - RPO (Recovery Point Objective)
+        - Disaster recovery
+        - Data replication
+
+        Args:
+            ctx: Agent context
+
+        Returns:
+            Dictionary with gaps and recommendations
+        """
+        model = ctx.deps.c4_model
+        char = ctx.deps.characteristics_by_name.get("Recoverability")
+
+        if not char:
+            return {"gaps": [], "recommendations": []}
+
+        gaps = []
+        recommendations = []
+
+        # Check 1: Database backups
+        database_containers = [
+            c for c in model.containers
+            if any(db in " ".join(c.technology).lower() for db in ["database", "postgres", "mysql", "mongo"])
+        ]
+
+        critical_databases = [db for db in database_containers if db.criticality in ["CS1", "CS2"]]
+
+        if critical_databases:
+            gaps.append({
+                "area": "Database Backup Strategy",
+                "issue": f"{len(critical_databases)} critical databases - backup strategy should be verified",
+                "severity": "high" if char.rating in ["critical", "high"] else "medium",
+                "impact": "Risk of data loss if disaster occurs without proper backups.",
+                "current_state": "Backup configuration unclear",
+                "desired_state": "Automated backups with appropriate retention based on RPO requirements"
+            })
+
+            # Parse RTO/RPO from notes if available
+            rto_rpo_info = ""
+            if char.notes and ("rto" in char.notes.lower() or "rpo" in char.notes.lower()):
+                rto_rpo_info = f" Requirements from notes: {char.notes}"
+
+            recommendations.append({
+                "title": "Implement automated database backups",
+                "description": f"Configure automated backups for all critical databases with appropriate retention.{rto_rpo_info}",
+                "pattern": "Backup and Restore",
+                "technologies": ["AWS Backup", "RDS Automated Backups", "Point-in-Time Recovery", "Azure Backup"],
+                "implementation_effort": "low",
+                "priority": char.rating,
+                "rationale": "Regular automated backups are essential for data recovery. Retention should match RPO requirements.",
+                "tradeoffs": "Storage costs for backups, backup windows may impact performance",
+                "implementation_steps": [
+                    "Enable automated backups for all databases",
+                    "Configure backup retention (CS1: 35d, CS2: 7d per SAAT standards)",
+                    "Set up point-in-time recovery if required",
+                    "Store backups in separate region/AZ",
+                    "Test backup restoration regularly",
+                    "Document recovery procedures"
+                ]
+            })
+
+        # Check 2: Multi-region deployment for DR
+        # Infer from technology mentions
+        has_multi_region = any(
+            any(mr in " ".join(c.technology).lower() for mr in ["multi-region", "cross-region", "global"])
+            for c in model.containers
+        )
+
+        if not has_multi_region and char.rating == "critical":
+            gaps.append({
+                "area": "Disaster Recovery",
+                "issue": "No multi-region deployment detected for disaster recovery",
+                "severity": "high",
+                "impact": "Regional failure would cause complete service outage. Extended RTO.",
+                "current_state": "Single region deployment",
+                "desired_state": "Multi-region deployment with automated failover"
+            })
+
+            recommendations.append({
+                "title": "Implement multi-region disaster recovery",
+                "description": "Deploy critical services across multiple regions for disaster recovery capability.",
+                "pattern": "Multi-Region Active-Passive",
+                "technologies": ["Multi-Region Deployment", "Route53 Failover", "Database Replication", "Global Load Balancer"],
+                "implementation_effort": "high",
+                "priority": char.rating,
+                "rationale": "Multi-region deployment protects against regional failures, significantly reducing RTO.",
+                "tradeoffs": "Significant cost increase, complexity in data replication and consistency",
+                "implementation_steps": [
+                    "Identify critical services for multi-region deployment",
+                    "Deploy secondary region infrastructure",
+                    "Configure cross-region database replication",
+                    "Set up global load balancer with health checks",
+                    "Implement automated failover procedures",
+                    "Test DR failover regularly"
+                ]
+            })
+
+        # Check 3: Backup restoration testing
+        gaps.append({
+            "area": "Recovery Testing",
+            "issue": "Backup restoration testing should be verified",
+            "severity": "medium",
+            "impact": "Untested backups may fail during actual recovery, extending RTO.",
+            "current_state": "Recovery testing procedures unknown",
+            "desired_state": "Regular DR drills and backup restoration tests"
+        })
+
+        recommendations.append({
+            "title": "Establish regular recovery testing",
+            "description": "Schedule regular DR drills and backup restoration tests to verify recovery procedures.",
+            "pattern": "DR Testing",
+            "technologies": ["DR Runbooks", "Automated Testing", "Chaos Engineering"],
+            "implementation_effort": "low",
+            "priority": char.rating,
+            "rationale": "Untested recovery procedures often fail when needed. Regular testing ensures confidence and reduces RTO.",
+            "tradeoffs": "Time investment, potential for disruption if not done carefully",
+            "implementation_steps": [
+                "Create detailed recovery runbooks",
+                "Schedule quarterly DR drills",
+                "Test backup restoration in non-production",
+                "Measure actual RTO/RPO in tests",
+                "Update procedures based on learnings",
+                "Consider chaos engineering for resilience testing"
+            ]
+        })
+
+        return {"gaps": gaps, "recommendations": recommendations}
+
     # More tools will be added below...
-    # (Security, Reliability, Maintainability, Testability, Deployability,
-    #  Fault Tolerance, Recoverability, Interoperability, Configurability,
-    #  Extensibility, Usability)
+    # (Maintainability, Testability, Deployability,
+    #  Interoperability, Configurability, Extensibility, Usability)
 
     return agent
 
