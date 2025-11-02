@@ -1,6 +1,13 @@
 # SAAT - Solution Architecture Agent Toolkit
 
 <p align="center">
+  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/python-3.11+-green.svg" alt="Python">
+  <img src="https://img.shields.io/badge/license-MIT-orange.svg" alt="License">
+  <img src="https://img.shields.io/badge/status-production%20ready-success.svg" alt="Status">
+</p>
+
+<p align="center">
   <strong>🤖 AI-Powered C4 Architecture Discovery, Analysis & Infrastructure Generation</strong>
 </p>
 
@@ -44,7 +51,7 @@ SAAT is a **complete architecture toolkit** powered by PydanticAI that supports 
 
 ### Key Features
 
-✅ **6 Specialized AI Agents** - Each with checklist workflow and approval system
+✅ **7 Specialized AI Agents** - Each with checklist workflow and approval system
 ✅ **Brownfield & Greenfield** - Analyze existing code OR design from requirements
 ✅ **Structurizr JSON Standard** - Industry-standard format for C4 models
 ✅ **bac4-standalone Integration** - Visual editing with round-trip conversion
@@ -113,8 +120,8 @@ saat generate-docs -m architecture.json -f markdown -f plantuml -o docs/
 # 1. Extract requirements from PRD
 saat discover-requirements -f docs/requirements.md -n "Payment Platform" -o requirements.json
 
-# 2. Generate architecture (manual or from template)
-# TODO: saat generate-from-requirements --requirements requirements.json -o architecture.json
+# 2. Design architecture (use bac4-standalone visual editor or manual creation)
+# Note: Automatic architecture generation from requirements coming in v1.1
 
 # 3. Export for visual editing
 saat export-structurizr -m architecture.json -o structurizr.json
@@ -869,25 +876,35 @@ SAAT/
 
 ## 📚 Documentation
 
-- **[BAC4_INTEGRATION.md](BAC4_INTEGRATION.md)** - Complete guide for bac4-standalone integration
-- **[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)** - Development roadmap
-- **[NEXT_STEPS.md](NEXT_STEPS.md)** - Future enhancements
-- **Examples**: See `examples/` directory
+- **[README.md](README.md)** - This complete user guide (you are here)
+- **[RELEASE_NOTES.md](RELEASE_NOTES.md)** - v1.0.0 release information
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and planned features
+- **[BAC4_INTEGRATION.md](BAC4_INTEGRATION.md)** - bac4-standalone integration guide
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and design
+- **[examples/](examples/)** - Working examples and sample files
 
 ---
 
 ## 🤝 Contributing
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) (TODO).
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes with tests
+4. Submit a pull request
 
 ### Development Setup
 
 ```bash
 git clone https://github.com/DavidROliverBA/SAAT.git
 cd SAAT
+pip install -e ".[dev]"
+# or
 poetry install
-poetry run pytest  # Run tests (TODO)
 ```
+
+### Future: Testing Suite
+Comprehensive testing suite planned for v1.2.0.
 
 ---
 

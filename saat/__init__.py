@@ -35,7 +35,7 @@ from saat.models import (
     ValidationResult,
 )
 
-__version__ = "2.0.0"
+__version__ = "1.0.0"
 __all__ = [
     # Models
     "C4Model",
