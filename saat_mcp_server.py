@@ -190,6 +190,35 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="analyze_architecture_characteristics",
+            description="Analyze C4 model against architecture characteristics using Mark Richards' methodology",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "model_file": {
+                        "type": "string",
+                        "description": "Path to C4 model JSON file",
+                    },
+                    "characteristics_file": {
+                        "type": "string",
+                        "description": "Path to ArchCharCapture JSON file with characteristics",
+                    },
+                    "output_file": {
+                        "type": "string",
+                        "default": "archchar-analysis",
+                        "description": "Output file path (without extension)",
+                    },
+                    "format": {
+                        "type": "string",
+                        "enum": ["markdown", "json", "both"],
+                        "default": "both",
+                        "description": "Output format",
+                    },
+                },
+                "required": ["model_file", "characteristics_file"],
+            },
+        ),
+        Tool(
             name="full_analysis",
             description="Complete end-to-end analysis: discover, generate, validate, and document",
             inputSchema={
@@ -558,6 +587,90 @@ Generated files:
 """,
             )
         ]
+
+    elif name == "analyze_architecture_characteristics":
+        model_file = arguments["model_file"]
+        characteristics_file = arguments["characteristics_file"]
+        output_file = arguments.get("output_file", "archchar-analysis")
+        format_type = arguments.get("format", "both")
+
+        # Import required modules
+        from saat.converters_archchar import import_archchar_json
+        from saat.agents.archchar import (
+            ArchCharAnalysisAgent,
+            save_report,
+        )
+
+        # Load C4 model
+        model_data = json.loads(Path(model_file).read_text())
+        model = C4Model(**model_data)
+
+        # Load architecture characteristics
+        archchar_input = import_archchar_json(characteristics_file)
+
+        # Run analysis
+        agent = ArchCharAnalysisAgent(DEFAULT_MODEL)
+        result = await agent.analyze(model, archchar_input, auto_approve=True)
+
+        # Save reports based on format
+        output_path = Path(output_file)
+        generated_files = []
+
+        if format_type in ["markdown", "both"]:
+            markdown_path = output_path.with_suffix(".md")
+            save_report(result, markdown_path, format="markdown")
+            generated_files.append(str(markdown_path))
+
+        if format_type in ["json", "both"]:
+            json_path = output_path.with_suffix(".json")
+            save_report(result, json_path, format="json")
+            generated_files.append(str(json_path))
+
+        # Build summary of critical gaps
+        critical_summary = ""
+        if result.critical_gaps:
+            critical_items = []
+            for gap in result.critical_gaps[:3]:
+                critical_items.append(f"  - {gap.area}: {gap.issue}")
+            critical_summary = "\n".join(critical_items)
+            if len(result.critical_gaps) > 3:
+                critical_summary += f"\n  ... and {len(result.critical_gaps) - 3} more"
+
+        # Build summary of top recommendations
+        rec_summary = ""
+        if result.top_recommendations:
+            rec_items = []
+            for rec in result.top_recommendations[:3]:
+                rec_items.append(f"  - {rec.title} ({rec.priority} priority)")
+            rec_summary = "\n".join(rec_items)
+            if len(result.top_recommendations) > 3:
+                rec_summary += f"\n  ... and {len(result.top_recommendations) - 3} more"
+
+        files_list = "\n".join(f"  - {f}" for f in generated_files)
+
+        # Build response
+        response_text = f"""✅ Architecture characteristics analysis complete:
+
+**Overall Score**: {result.overall_score}/100
+**Characteristics Analyzed**: {result.characteristics_analyzed}
+**Critical Gaps**: {len(result.critical_gaps)}
+**High Priority Gaps**: {len(result.high_priority_gaps)}
+**Top Recommendations**: {len(result.top_recommendations)}
+
+**Executive Summary**:
+{result.executive_summary}
+"""
+
+        if critical_summary:
+            response_text += f"\n\n⚠️ **Critical Gaps**:\n{critical_summary}"
+
+        if rec_summary:
+            response_text += f"\n\n💡 **Top Recommendations**:\n{rec_summary}"
+
+        response_text += f"\n\n**Generated Reports**:\n{files_list}"
+        response_text += "\n\n📖 See full reports for detailed analysis and implementation steps."
+
+        return [TextContent(type="text", text=response_text)]
 
     else:
         return [TextContent(type="text", text=f"Unknown tool: {name}")]
