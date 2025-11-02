@@ -1,0 +1,216 @@
+{
+  "systems": [
+    {
+      "name": "E-Commerce Platform",
+      "description": "Online shopping platform for retail customers",
+      "external": false
+    }
+  ],
+  "externals": [
+    {
+      "name": "Payment Gateway",
+      "description": "Third-party payment processing service",
+      "external": true
+    },
+    {
+      "name": "Shipping Provider",
+      "description": "Third-party shipping and logistics service",
+      "external": true
+    }
+  ],
+  "containers": [
+    {
+      "name": "Web Frontend",
+      "description": "Customer-facing web application",
+      "technology": "React, Next.js",
+      "external": false,
+      "interfaces": [
+        {
+          "port": 443,
+          "protocol": "HTTP",
+          "description": "Web UI"
+        }
+      ]
+    },
+    {
+      "name": "API Gateway",
+      "description": "API gateway for backend services",
+      "technology": "Kong",
+      "external": false,
+      "interfaces": [
+        {
+          "port": 443,
+          "protocol": "HTTPS",
+          "description": "REST API"
+        }
+      ]
+    },
+    {
+      "name": "Product Service",
+      "description": "Manages product catalog",
+      "technology": "Node.js, Express",
+      "external": false,
+      "sizing": "SL1",
+      "interfaces": [
+        {
+          "port": 3000,
+          "protocol": "HTTP",
+          "description": "Product API"
+        }
+      ]
+    },
+    {
+      "name": "Order Service",
+      "description": "Manages customer orders",
+      "technology": "Java, Spring Boot",
+      "external": false,
+      "sizing": "CS1",
+      "interfaces": [
+        {
+          "port": 8080,
+          "protocol": "HTTP",
+          "description": "Order API"
+        }
+      ]
+    },
+    {
+      "name": "User Service",
+      "description": "Manages user accounts and authentication",
+      "technology": "Python, FastAPI",
+      "external": false,
+      "sizing": "SL1",
+      "interfaces": [
+        {
+          "port": 8000,
+          "protocol": "HTTP",
+          "description": "User API"
+        }
+      ]
+    },
+    {
+      "name": "Product Database",
+      "description": "Product catalog data store",
+      "technology": "PostgreSQL",
+      "external": false,
+      "sizing": "SL1",
+      "interfaces": [
+        {
+          "port": 5432,
+          "protocol": "PostgreSQL",
+          "description": "Database"
+        }
+      ]
+    },
+    {
+      "name": "Order Database",
+      "description": "Order transaction data store",
+      "technology": "PostgreSQL",
+      "external": false,
+      "sizing": "CS1",
+      "interfaces": [
+        {
+          "port": 5432,
+          "protocol": "PostgreSQL",
+          "description": "Database"
+        }
+      ]
+    },
+    {
+      "name": "User Database",
+      "description": "User account data store",
+      "technology": "PostgreSQL",
+      "external": false,
+      "sizing": "SL1",
+      "interfaces": [
+        {
+          "port": 5432,
+          "protocol": "PostgreSQL",
+          "description": "Database"
+        }
+      ]
+    },
+    {
+      "name": "Payment Gateway",
+      "description": "Third-party payment gateway integration",
+      "technology": "Stripe",
+      "external": true,
+      "interfaces": [
+        {
+          "port": 443,
+          "protocol": "HTTPS",
+          "description": "Payment API"
+        }
+      ]
+    },
+    {
+      "name": "Shipping Provider",
+      "description": "Third-party shipping provider integration",
+      "technology": "FedEx API",
+      "external": true,
+      "interfaces": [
+        {
+          "port": 443,
+          "protocol": "HTTPS",
+          "description": "Shipping API"
+        }
+      ]
+    }
+  ],
+  "components": [],
+  "relationships": [
+    {
+      "source": "Web Frontend",
+      "target": "API Gateway",
+      "description": "Makes API calls to",
+      "technology": "HTTPS/REST"
+    },
+    {
+      "source": "API Gateway",
+      "target": "Product Service",
+      "description": "Routes requests to",
+      "technology": "HTTP"
+    },
+    {
+      "source": "API Gateway",
+      "target": "Order Service",
+      "description": "Routes requests to",
+      "technology": "HTTP"
+    },
+    {
+      "source": "API Gateway",
+      "target": "User Service",
+      "description": "Routes requests to",
+      "technology": "HTTP"
+    },
+    {
+      "source": "Product Service",
+      "target": "Product Database",
+      "description": "Reads from and writes to",
+      "technology": "SQL"
+    },
+    {
+      "source": "Order Service",
+      "target": "Order Database",
+      "description": "Reads from and writes to",
+      "technology": "SQL"
+    },
+    {
+      "source": "User Service",
+      "target": "User Database",
+      "description": "Reads from and writes to",
+      "technology": "SQL"
+    },
+    {
+      "source": "Order Service",
+      "target": "Payment Gateway",
+      "description": "Processes payments through",
+      "technology": "HTTPS"
+    },
+    {
+      "source": "Order Service",
+      "target": "Shipping Provider",
+      "description": "Arranges shipping through",
+      "technology": "HTTPS"
+    }
+  ]
+}
