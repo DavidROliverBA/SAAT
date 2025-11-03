@@ -9,934 +9,225 @@
 </p>
 
 <p align="center">
-  <strong>🤖 AI-Powered C4 Architecture Discovery, Analysis & Infrastructure Generation</strong>
-</p>
-
-<p align="center">
-  Complete architecture quality assurance platform: Discover architecture, evaluate against quality characteristics, validate compliance, analyze security, generate documentation, and create infrastructure-as-code using 9 specialized AI agents powered by PydanticAI
+  <strong>🤖 AI-Powered Software Architecture Analysis & Quality Assurance Platform</strong>
 </p>
 
 ---
 
 ## 📋 Table of Contents
 
-- [Overview](#-overview)
+- [What is SAAT?](#-what-is-saat)
 - [Quick Start](#-quick-start)
-- [Claude Code Integration](#-claude-code-integration-slash-commands-new) ⭐ **NEW**
 - [Installation](#-installation)
+- [Usage Guides](#-usage-guides)
 - [Core Concepts](#-core-concepts)
-- [Workflows](#-workflows)
-  - [Brownfield (Existing Code)](#brownfield-existing-code-analysis)
-  - [Greenfield (From Scratch)](#greenfield-from-scratch-design)
 - [Available Agents](#-available-agents)
-- [CLI Commands](#-cli-commands)
-- [bac4-standalone Integration](#-bac4-standalone-visual-editor-integration)
-- [MCP Tools](#-mcp-tools)
-- [Model Support](#-model-support)
+- [Documentation](#-documentation)
 - [Examples](#-examples)
-- [Architecture](#-architecture)
+- [Contributing](#-contributing)
+- [Appendix](#-appendix)
 
 ---
 
-## 🎯 Overview
+## 🎯 What is SAAT?
 
-SAAT is a **complete architecture toolkit** powered by PydanticAI that supports the entire software architecture lifecycle:
+SAAT is an **AI-powered architecture quality assurance platform** that helps you:
 
-- **Discover** architecture from existing codebases (brownfield)
-- **Extract** requirements from documents (greenfield)
-- **Generate** C4 models automatically
-- **Evaluate** architecture quality against 14 characteristics ⭐ **NEW**
-- **Validate** against compliance frameworks (PCI-DSS, HIPAA, GDPR, SOC2)
-- **Analyze** security posture and generate threat models
-- **Generate** comprehensive documentation (Markdown, PlantUML, Mermaid, ADRs)
-- **Create** production-ready infrastructure-as-code (Terraform for AWS/Azure/GCP)
-- **Visualize** with bac4-standalone C4 editor integration
-
-### Key Features
-
-✅ **9 Specialized AI Agents** - Each with checklist workflow and approval system
-✅ **Architecture Quality Analysis** ⭐ **NEW** - Evaluate against 14 characteristics (Mark Richards methodology)
-✅ **Claude Code Slash Commands** ⭐ **NEW** - Type `/saat-` for effortless usage
-✅ **Brownfield & Greenfield** - Analyze existing code OR design from requirements
-✅ **Structurizr JSON Standard** - Industry-standard format for C4 models
-✅ **bac4-standalone Integration** - Visual editing with round-trip conversion
-✅ **Human-in-the-Loop** - Interactive approval with auto-approve mode
-✅ **Multi-Model Support** - Claude, GPT-4, Gemini, Ollama
-✅ **MCP Integration** - Seamless integration with Claude Code
-✅ **Production Ready** - Retry logic, streaming, error handling
-✅ **Type-Safe** - Pydantic models ensure correctness
+1. **Analyze existing codebases** (brownfield) - Discover architecture automatically
+2. **Design new systems** (greenfield) - Extract requirements and generate architecture
+3. **Evaluate quality** - Score architecture against 14 standard characteristics
+4. **Validate compliance** - Check against PCI-DSS, HIPAA, GDPR, SOC2
+5. **Analyze security** - Identify vulnerabilities and generate threat models
+6. **Generate documentation** - Create comprehensive docs in multiple formats
+7. **Create infrastructure** - Generate production-ready Terraform for AWS/Azure/GCP
 
 ### Why SAAT?
 
-Traditional architecture tools require manual diagram creation and maintenance. SAAT **automates** the entire process:
+Traditional architecture work is manual and time-consuming. SAAT **automates the entire process**:
 
 ```
-Traditional:                           SAAT:
-┌─────────────────┐                   ┌─────────────────┐
-│ Manual Analysis │                   │ AI Analyzes     │
-│ (days/weeks)    │                   │ (minutes)       │
-└─────────────────┘                   └─────────────────┘
-         ↓                                      ↓
-┌─────────────────┐                   ┌─────────────────┐
-│ Draw Diagrams   │                   │ Auto-Generate   │
-│ (hours)         │                   │ C4 Models       │
-└─────────────────┘                   └─────────────────┘
-         ↓                                      ↓
-┌─────────────────┐                   ┌─────────────────┐
-│ Write Docs      │                   │ Validate &      │
-│ (days)          │                   │ Document        │
-└─────────────────┘                   └─────────────────┘
-         ↓                                      ↓
-┌─────────────────┐                   ┌─────────────────┐
-│ Manual Updates  │                   │ Generate        │
-│ (ongoing pain)  │                   │ Infrastructure  │
-└─────────────────┘                   └─────────────────┘
+Traditional Approach:          SAAT Approach:
+┌─────────────────┐           ┌─────────────────┐
+│ Manual Analysis │           │ /saat-discover  │
+│ (days/weeks)    │           │ (minutes)       │
+└─────────────────┘           └─────────────────┘
+         ↓                             ↓
+┌─────────────────┐           ┌─────────────────┐
+│ Draw Diagrams   │           │ /saat-generate  │
+│ (hours)         │           │ (automatic)     │
+└─────────────────┘           └─────────────────┘
+         ↓                             ↓
+┌─────────────────┐           ┌─────────────────┐
+│ Write Docs      │           │ /saat-analyze   │
+│ (days)          │           │ (with scores)   │
+└─────────────────┘           └─────────────────┘
 ```
+
+### Key Features
+
+✅ **9 Specialized AI Agents** - Discovery, Generation, Requirements, Quality Analysis, Validation, Security, Documentation, Infrastructure, Orchestration
+✅ **Architecture Quality Analysis** - Evaluate against 14 characteristics (Mark Richards methodology)
+✅ **Conversational Slash Commands** - Type `/saat-` in Claude Code for guided workflows
+✅ **C4 Model Standard** - Industry-standard architecture diagrams
+✅ **Multi-Model Support** - Claude, GPT-4, Gemini, Ollama
+✅ **Human-in-the-Loop** - Interactive approval with auto-approve mode
+✅ **Production Ready** - Retry logic, streaming, error handling
 
 ---
 
 ## 🚀 Quick Start
 
-### Brownfield: Analyze Existing Code
+### The Easy Way: Claude Code Slash Commands (Recommended)
 
+1. **Install SAAT and configure Claude Code**:
 ```bash
-# 1. Install SAAT
+# Clone and install SAAT
+git clone https://github.com/DavidROliverBA/SAAT.git
+cd SAAT
 pip install -e .
 
-# 2. Set API key
+# Install Claude Code slash commands
+./install-claude-commands.sh
+
+# Set API key
 export ANTHROPIC_API_KEY="your-key"
-
-# 3. Analyze your codebase
-saat analyze --path /path/to/your/code -o architecture.json
-
-# 4. Validate against PCI-DSS
-saat validate-model -m architecture.json -f PCI-DSS
-
-# 5. Generate AWS infrastructure
-saat generate-terraform -m architecture.json -p aws -o infrastructure/
-
-# 6. Generate documentation
-saat generate-docs -m architecture.json -f markdown -f plantuml -o docs/
 ```
 
-### Greenfield: Design from Requirements
-
-```bash
-# 1. Extract requirements from PRD
-saat discover-requirements -f docs/requirements.md -n "Payment Platform" -o requirements.json
-
-# 2. Design architecture (use bac4-standalone visual editor or manual creation)
-# Note: Automatic architecture generation from requirements coming in v1.1
-
-# 3. Export for visual editing
-saat export-structurizr -m architecture.json -o structurizr.json
-
-# 4. Open bac4-standalone → Import → Edit → Export
-
-# 5. Import refined model
-saat import-structurizr -s structurizr.json -o architecture-final.json
-
-# 6. Generate everything
-saat validate-model -m architecture-final.json -f HIPAA
-saat security-scan -m architecture-final.json --threat-model
-saat generate-terraform -m architecture-final.json -p aws
+2. **Analyze an existing project** (Brownfield):
 ```
+Open Claude Code in your project directory, then:
+
+You: /saat-orchestrate
+
+Claude: I'll help you analyze your architecture!
+        What would you like to do?
+        1. Analyze existing codebase (brownfield)
+        2. Design new system (greenfield)
+        3. Review specific architecture aspect
+
+You: Analyze my existing codebase
+
+Claude: [Runs discovery, generates C4 model, analyzes quality,
+        validates compliance, checks security, generates docs]
+
+        ✅ Complete analysis finished!
+
+        📊 Results Summary:
+        - Architecture Model: 5 systems, 12 containers, 28 components
+        - Quality Score: 68/100 (Needs Improvement)
+        - Compliance: 85/100 (PCI-DSS)
+        - Security: 3 critical issues found
+        - Documentation: Generated in docs/
+
+        🚨 Top Priorities:
+        1. Fix critical security issue: Unencrypted database connection
+        2. Add load balancer for availability (currently 55/100)
+        3. Implement auto-scaling for scalability
+
+        Next: Would you like me to generate Terraform to deploy fixes?
+```
+
+3. **Design a new system** (Greenfield):
+```
+You: /saat-orchestrate
+
+Claude: What would you like to do?
+
+You: Design a new payment processing system
+
+Claude: I'll guide you through designing your architecture.
+
+        Do you have requirements documents? If so, please provide paths.
+        Otherwise, I can help you capture requirements conversationally.
+
+You: I have docs/requirements.md
+
+Claude: [Extracts requirements, generates architecture, analyzes quality,
+        validates, checks security, generates infrastructure]
+
+        ✅ Architecture design complete!
+
+        📊 Your New System:
+        - 3 systems, 8 containers, 15 components
+        - Quality Score: 82/100 (Good)
+        - Compliance: PCI-DSS ready (98/100)
+        - Security: All checks passed
+        - Infrastructure: AWS Terraform ready to deploy
+
+        Files created:
+        - architecture.json (C4 model)
+        - docs/ (comprehensive documentation)
+        - infrastructure/ (Terraform IaC)
+
+        You can now: terraform apply to deploy!
+```
+
+### Individual Commands
+
+All commands are conversational and guide you step-by-step:
+
+- `/saat-orchestrate` - **Start here!** Recommends what to do based on your needs
+- `/saat-discover` - Analyze existing codebase
+- `/saat-requirements` - Extract requirements from documents
+- `/saat-generate` - Create architecture model
+- `/saat-analyze-characteristics` - Evaluate architecture quality
+- `/saat-validate` - Check compliance
+- `/saat-security` - Analyze security
+- `/saat-document` - Generate documentation
+- `/saat-terraform` - Create infrastructure code
+- `/saat-help` - Show all commands
+
+**See**: [Complete Usage Guides](#-usage-guides) for detailed walkthroughs.
 
 ---
 
 ## 📦 Installation
 
-### Prerequisites
-
-- Python 3.11+
-- API key for Claude, GPT-4, or other supported models
-
-### Option 1: pip (Recommended)
+### Step 1: Install SAAT
 
 ```bash
+# Clone repository
 git clone https://github.com/DavidROliverBA/SAAT.git
 cd SAAT
+
+# Install with pip
 pip install -e .
 
-# Or with all extras
-pip install -e ".[all]"  # Logfire, OpenAI, Gemini support
-```
+# Or with all extras (Logfire, OpenAI, Gemini)
+pip install -e ".[all]"
 
-### Option 2: Poetry
-
-```bash
-git clone https://github.com/DavidROliverBA/SAAT.git
-cd SAAT
+# Or with Poetry
 poetry install
 ```
 
-### Environment Setup
+### Step 2: Set API Key
 
 ```bash
 # Create .env file
 cp .env.example .env
 
-# Add your API keys
+# Add your API key
 echo "ANTHROPIC_API_KEY=your-key-here" >> .env
 
 # Optional: Choose default model
 echo "SAAT_MODEL=anthropic:claude-sonnet-4" >> .env
 ```
 
-### Verify Installation
+### Step 3: Configure Claude Code (Recommended)
 
-```bash
-saat --version
-saat info
-```
-
----
-
-## 🧠 Core Concepts
-
-### C4 Model
-
-SAAT uses the [C4 model](https://c4model.com) for software architecture:
-
-- **Level 1 - System Context**: High-level systems and external dependencies
-- **Level 2 - Container**: Applications, databases, microservices
-- **Level 3 - Component**: Code-level modules and services
-- **Level 4 - Code**: Classes and functions (future)
-
-### Criticality Levels
-
-SAAT assigns criticality to guide infrastructure decisions:
-
-| Level | Uptime | Infrastructure | Use Case |
-|-------|--------|---------------|----------|
-| **CS1** | 99.99% | Multi-AZ, auto-scaling 2-10, 35d backups | Mission critical (payments, auth) |
-| **CS2** | 99.9% | Multi-AZ, auto-scaling 2-5, 7d backups | Business critical (APIs, databases) |
-| **SL1** | 99.5% | Single-AZ, basic monitoring, 3d backups | Standard services |
-| **SL2** | 99% | Single-AZ, minimal config, 3d backups | Internal tools |
-| **STANDARD** | Best effort | Minimal, no backups | Development, testing |
-
-### Checklist Workflow
-
-All agents follow a consistent workflow:
-
-```
-1. Generate Checklist → 2. Show to User → 3. Request Approval → 4. Execute Tasks
-```
-
-**Interactive Mode** (default):
-```bash
-saat validate-model -m architecture.json
-
-📋 ValidationAgent Checklist:
-  [ ] Load and parse C4 model
-  [ ] Check structural integrity
-  [ ] Validate relationships
-  [ ] Check completeness
-  [ ] Verify criticality assignments
-
-Proceed? [y/N]: y
-```
-
-**Auto-Approve Mode**:
-```bash
-saat -y validate-model -m architecture.json
-# or
-saat --auto-approve validate-model -m architecture.json
-```
-
----
-
-## 🔄 Workflows
-
-### Brownfield: Existing Code Analysis
-
-Analyze an existing codebase to generate architecture models:
-
-```bash
-# Step 1: Discovery
-saat discover --path /my-app --output discovery.json
-
-# Step 2: Generate C4 Model
-saat generate --discovery discovery.json --output architecture.json
-
-# Or do both in one command:
-saat analyze --path /my-app --output architecture.json
-
-# Step 3: Validate
-saat validate-model -m architecture.json -f PCI-DSS -o validation.json
-
-# Step 4: Security Analysis
-saat security-scan -m architecture.json --threat-model -o security.json
-
-# Step 5: Generate Documentation
-saat generate-docs -m architecture.json -f markdown -f plantuml -o docs/
-
-# Step 6: Generate Infrastructure
-saat generate-terraform -m architecture.json -p aws -r us-east-1 -o infrastructure/
-```
-
-### Greenfield: From-Scratch Design
-
-Design a new system from requirements:
-
-```bash
-# Step 1: Extract Requirements
-saat discover-requirements \\
-  -f docs/PRD.md \\
-  -f docs/tech-requirements.md \\
-  -n "Payment Processing Platform" \\
-  -o requirements.json
-
-# Output: requirements.json with:
-# - Functional requirements (REQ-F-001, REQ-F-002, ...)
-# - Non-functional requirements (REQ-NF-001: 99.9% uptime, ...)
-# - User stories (US-001: As a customer, I want...)
-# - Technical constraints (CONST-001: PCI-DSS, ...)
-# - Stakeholders
-
-# Step 2: Design Architecture
-# TODO: Implement generate-from-requirements
-# For now: Manually create or use templates
-
-# Step 3: Validate & Refine (same as brownfield)
-saat validate-model -m architecture.json -f PCI-DSS
-saat security-scan -m architecture.json
-saat generate-terraform -m architecture.json -p aws
-```
-
-### Round-Trip with bac4-standalone
-
-Combine AI analysis with visual editing:
-
-```bash
-# 1. Generate with SAAT
-saat analyze --path /my-app -o architecture.json
-
-# 2. Export to Structurizr format
-saat export-structurizr -m architecture.json -o structurizr.json
-
-# 3. Edit visually in bac4-standalone
-# - Import structurizr.json
-# - Drag & drop to refine layout
-# - Add missing elements
-# - Clarify relationships
-# - Export as structurizr-refined.json
-
-# 4. Import back to SAAT
-saat import-structurizr -s structurizr-refined.json -o architecture-refined.json
-
-# 5. Generate infrastructure from refined model
-saat generate-terraform -m architecture-refined.json -p aws
-```
-
----
-
-## 🤖 Available Agents
-
-### 1. Discovery Agent (Brownfield)
-**Purpose**: Analyze existing codebases to discover architecture
-
-```python
-from saat.agents import DiscoveryAgent
-
-agent = DiscoveryAgent()
-discovery = await agent.analyze_repository("/path/to/repo", max_depth=3)
-
-# Discovers:
-# - Technologies used
-# - Architectural patterns (microservices, MVC, etc.)
-# - Services and components
-# - Dependencies
-```
-
-### 2. Generator Agent
-**Purpose**: Generate C4 models from discovery results
-
-```python
-from saat.agents import GeneratorAgent
-
-agent = GeneratorAgent()
-model = await agent.generate_model(discovery, business_context)
-
-# Generates:
-# - System Context diagrams
-# - Container diagrams
-# - Component diagrams
-# - Relationships
-```
-
-### 3. Requirements Agent (Greenfield)
-**Purpose**: Extract requirements from documents
-
-```python
-from saat.agents import RequirementsAgent
-
-agent = RequirementsAgent()
-result = await agent.discover_requirements(
-    file_paths=["docs/PRD.md", "docs/tech-spec.md"],
-    project_name="Payment Platform",
-    auto_approve=False  # Interactive mode
-)
-
-# Extracts:
-# - Functional requirements (REQ-F-001, ...)
-# - Non-functional requirements (performance, security, ...)
-# - User stories (As a... I want... So that...)
-# - Technical constraints (compliance, technology choices, ...)
-# - Stakeholders
-```
-
-### 4. Validation Agent
-**Purpose**: Validate C4 models against standards
-
-```python
-from saat.agents import ValidationAgent
-
-agent = ValidationAgent()
-result = await agent.validate_model(
-    model=c4_model,
-    framework="PCI-DSS",  # or HIPAA, GDPR, SOC2
-    auto_approve=True
-)
-
-# Validates:
-# - Structural integrity (no orphaned elements)
-# - Relationship consistency
-# - Completeness
-# - Compliance with frameworks
-# - Best practices
-```
-
-### 5. Documentation Agent
-**Purpose**: Generate comprehensive documentation
-
-```python
-from saat.agents import DocumentationAgent
-
-agent = DocumentationAgent()
-result = await agent.generate_documentation(
-    model=c4_model,
-    output_dir="docs/",
-    formats=["markdown", "plantuml", "mermaid", "adr"],
-    auto_approve=False
-)
-
-# Generates:
-# - Markdown overview
-# - PlantUML C4 diagrams
-# - Mermaid diagrams
-# - Architecture Decision Records (ADRs)
-```
-
-### 6. Security Agent
-**Purpose**: Analyze security posture
-
-```python
-from saat.agents import SecurityAgent
-
-agent = SecurityAgent()
-result = await agent.analyze_security(
-    model=c4_model,
-    threat_model=True,
-    output_file="security-report.json",
-    auto_approve=False
-)
-
-# Analyzes:
-# - Unencrypted communications
-# - Missing authentication
-# - Sensitive data exposure
-# - Access controls
-# - Compliance violations
-# - Threat modeling (STRIDE)
-```
-
-### 7. Terraform Agent
-**Purpose**: Generate infrastructure-as-code
-
-```python
-from saat.agents import TerraformAgent
-
-agent = TerraformAgent()
-result = await agent.generate_terraform(
-    model=c4_model,
-    provider="aws",  # or azure, gcp
-    region="us-east-1",
-    output_dir="infrastructure/",
-    auto_approve=False
-)
-
-# Generates:
-# - main.tf (resources based on criticality)
-# - variables.tf
-# - outputs.tf
-# - terraform.tfvars.example
-# - Multi-AZ for CS1/CS2
-# - Auto-scaling based on criticality
-# - Backups (35d for CS1, 7d for CS2, 3d for SL1/SL2)
-```
-
-### 8. Architecture Characteristics Agent ⭐ **NEW**
-**Purpose**: Evaluate architecture quality against 14 standard characteristics (Mark Richards methodology)
-
-```python
-from saat.agents import ArchCharAgent
-
-agent = ArchCharAgent()
-result = await agent.analyze_architecture(
-    model=c4_model,
-    characteristics_input=archchar_input,  # from ArchCharCapture
-    auto_approve=False
-)
-
-# Analyzes:
-# - Operational (7): Availability, Scalability, Performance, Security,
-#                    Reliability, Fault Tolerance, Recoverability
-# - Structural (5): Maintainability, Testability, Deployability,
-#                   Configurability, Extensibility
-# - Cross-Cutting (2): Interoperability, Usability
-#
-# Provides:
-# - Overall quality score (0-100, weighted by importance)
-# - Per-characteristic scores and compliance status
-# - Critical and high-priority gaps with severity levels
-# - Pattern-based recommendations with implementation steps
-# - Technology suggestions and effort estimates
-# - Detailed reports (Markdown + JSON)
-```
-
-**CLI Usage**:
-```bash
-# Analyze architecture quality
-saat analyze-characteristics \
-  -m architecture.json \
-  -c characteristics.json \
-  -o archchar-analysis
-
-# Or use the slash command for guided workflow
-# /saat-analyze-characteristics
-```
-
-**Output Example**:
-```
-Overall Score: 72/100 (Mostly Compliant)
-
-Critical Gaps (2):
-  - Availability: No load balancer for critical services
-  - Scalability: Missing auto-scaling configuration
-
-Top Recommendations:
-  1. Implement active-active clustering with load balancing
-  2. Configure Kubernetes HPA for auto-scaling
-  3. Add Redis caching layer for performance
-```
-
-**See**: [docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md](docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md) for complete guide.
-
----
-
-## 🖥️ CLI Commands
-
-### Analysis Commands
-
-```bash
-# Discover architecture from code
-saat discover --path /repo --output discovery.json [--max-depth 3]
-
-# Generate C4 model from discovery
-saat generate --discovery discovery.json --output architecture.json
-
-# Full analysis (discover + generate)
-saat analyze --path /repo --output architecture.json [--business-context context.json]
-```
-
-### Requirements (Greenfield)
-
-```bash
-# Extract requirements from documents
-saat discover-requirements \\
-  -f docs/PRD.md \\
-  -f docs/constraints.md \\
-  -n "Project Name" \\
-  -o requirements.json
-```
-
-### Validation
-
-```bash
-# Validate C4 model
-saat validate-model -m architecture.json -o validation-report.json
-
-# Validate with compliance framework
-saat validate-model -m architecture.json -f PCI-DSS
-saat validate-model -m architecture.json -f HIPAA
-saat validate-model -m architecture.json -f GDPR
-```
-
-### Architecture Characteristics ⭐ **NEW**
-
-```bash
-# Analyze architecture quality against 14 standard characteristics
-saat analyze-characteristics \
-  -m architecture.json \
-  -c characteristics.json \
-  -o archchar-analysis
-
-# Output includes:
-# - archchar-analysis.md (detailed report with recommendations)
-# - archchar-analysis.json (machine-readable results)
-
-# Or use the slash command for guided workflow:
-# /saat-analyze-characteristics
-```
-
-### Security
-
-```bash
-# Security analysis
-saat security-scan -m architecture.json -o security-report.json
-
-# Include threat modeling
-saat security-scan -m architecture.json --threat-model
-```
-
-### Documentation
-
-```bash
-# Generate documentation (multiple formats)
-saat generate-docs -m architecture.json -f markdown -f plantuml -o docs/
-
-# All formats
-saat generate-docs -m architecture.json \\
-  -f markdown \\
-  -f plantuml \\
-  -f mermaid \\
-  -f adr \\
-  -o docs/
-```
-
-### Infrastructure
-
-```bash
-# Generate Terraform for AWS
-saat generate-terraform -m architecture.json -p aws -r us-east-1 -o infrastructure/
-
-# Generate for Azure
-saat generate-terraform -m architecture.json -p azure -r eastus -o infrastructure/
-
-# Generate for GCP
-saat generate-terraform -m architecture.json -p gcp -r us-central1 -o infrastructure/
-```
-
-### Structurizr Integration
-
-```bash
-# Export to Structurizr JSON
-saat export-structurizr -m architecture.json -o structurizr.json
-
-# Import from Structurizr JSON
-saat import-structurizr -s structurizr.json -o architecture.json
-```
-
-### Global Options
-
-```bash
-# Auto-approve mode (skip all prompts)
-saat -y validate-model -m architecture.json
-saat --auto-approve generate-docs -m architecture.json
-
-# Use different model
-saat --model openai:gpt-4 analyze --path /repo
-
-# Set model via environment
-export SAAT_MODEL="openai:gpt-4"
-saat analyze --path /repo
-```
-
-### Utility Commands
-
-```bash
-# Show version and configuration
-saat info
-
-# Get help
-saat --help
-saat analyze --help
-```
-
----
-
-## 🎨 bac4-standalone Visual Editor Integration
-
-SAAT integrates with [bac4-standalone](https://github.com/DavidROliverBA/bac4-standalone) using the industry-standard **Structurizr JSON** format.
-
-### Why Integrate?
-
-- **SAAT**: AI-powered analysis, validation, security, infrastructure generation
-- **bac4-standalone**: Interactive visual editing, drag-and-drop, real-time layout
-- **Together**: Best of both worlds - AI + human refinement
-
-### Complete Workflow
-
-```
-┌──────────────┐                    ┌─────────────────┐                    ┌──────────────┐
-│              │  Structurizr JSON  │                 │  Structurizr JSON  │              │
-│     SAAT     │ ───────────────►   │  bac4-standalone│ ───────────────►   │     SAAT     │
-│  (Analysis)  │                    │   (Visual Edit) │                    │ (Infra Gen)  │
-└──────────────┘                    └─────────────────┘                    └──────────────┘
-```
-
-### Example
-
-```bash
-# 1. Analyze code with SAAT
-saat analyze --path /my-payment-app -o architecture.json
-
-# 2. Export to Structurizr
-saat export-structurizr -m architecture.json -o structurizr.json
-
-# 3. Open bac4-standalone (web browser)
-#    → Import structurizr.json
-#    → Visually refine diagram
-#    → Export as structurizr-refined.json
-
-# 4. Import refined model
-saat import-structurizr -s structurizr-refined.json -o architecture-refined.json
-
-# 5. Generate infrastructure from refined model
-saat generate-terraform -m architecture-refined.json -p aws -o infrastructure/
-
-# 6. Deploy!
-cd infrastructure/
-terraform init
-terraform plan
-terraform apply
-```
-
-### Data Preservation
-
-SAAT's rich metadata (criticality levels, interfaces, responsibilities) is preserved in the `properties` field during round-trip conversion.
-
-**See**: [BAC4_INTEGRATION.md](BAC4_INTEGRATION.md) for complete guide.
-
----
-
-## 🚀 Claude Code Integration (Slash Commands) ⭐ **NEW**
-
-SAAT now provides **slash commands** for Claude Code CLI, making architecture analysis as easy as typing `/saat-` and letting Claude guide you through the process!
-
-### Why Slash Commands?
-
-**Before (CLI)**: Remember complex switches and options
-```bash
-saat analyze-characteristics \
-  --model-file architecture.json \
-  --characteristics characteristics.json \
-  --output archchar-analysis \
-  --format both
-```
-
-**After (Slash Commands)**: Conversational, guided workflows
-```
-You: /saat-analyze-characteristics
-
-Claude: I'll help you analyze your architecture against specified characteristics...
-        What I need from you:
-        1. Path to your C4 model JSON file
-        2. Path to your architecture characteristics JSON file
-
-You: The model is in architecture.json and characteristics.json
-
-Claude: [Runs analysis using MCP tool]
-        ✅ Analysis complete!
-        Overall Score: 72/100 (Mostly Compliant)
-
-        Critical Gaps (2):
-        - Availability: No load balancer for critical services
-        - Scalability: Missing auto-scaling configuration
-
-        Full reports saved to:
-        - archchar-analysis.md
-        - archchar-analysis.json
-```
-
-### Installation
-
-#### Option 1: Automatic (Recommended)
-
-From the SAAT repository root:
+**Option A: Install Slash Commands Globally** (Available in all projects)
 ```bash
 ./install-claude-commands.sh
 ```
 
-This copies all slash command files to `~/.claude/commands/` making them available globally in Claude Code.
-
-#### Option 2: Manual Installation
-
+**Option B: Per-Project** (Already available when you run Claude Code from SAAT directory)
 ```bash
-# Copy to Claude Code's global commands directory
-cp -r .claude/commands/* ~/.claude/commands/
+# Commands are in .claude/commands/ - no installation needed!
 ```
 
-#### Option 3: Per-Project (No Installation Needed)
+**Configure MCP Server** (Required for slash commands to work):
 
-The commands are already in `.claude/commands/` in this repository. When you run Claude Code from the SAAT directory, they're automatically available!
-
-### Available Commands
-
-Once installed, type `/saat` in Claude Code and press Tab to see all commands:
-
-#### Discovery & Requirements
-- `/saat-discover` - Analyze existing codebase (brownfield)
-- `/saat-requirements` - Extract requirements from documents (greenfield)
-
-#### Generation & Quality Analysis
-- `/saat-generate` - Create C4 architecture model from discovery or requirements
-- `/saat-analyze-characteristics` ⭐ **NEW** - Evaluate architecture against 14 quality characteristics
-- `/saat-validate` - Validate model structural correctness and compliance
-- `/saat-security` - Analyze security posture and identify vulnerabilities
-
-#### Documentation & Infrastructure
-- `/saat-document` - Generate comprehensive documentation (Markdown, PlantUML, Mermaid, ADRs)
-- `/saat-terraform` - Generate Terraform infrastructure-as-code for AWS/Azure/GCP
-
-#### Complete Workflows
-- `/saat-full-pipeline` - Run everything: discover → generate → analyze → validate → secure → document → deploy
-- `/saat-help` - Show all SAAT commands with examples
-
-### Example Workflows
-
-#### Quick Architecture Review
-```
-You: /saat-full-pipeline
-
-Claude: I'll run the complete SAAT architecture pipeline!
-        What I need: Path to repository to analyze
-
-You: Analyze the current directory
-
-Claude: [Runs discover → generate → analyze → validate → secure → document → deploy]
-        ✅ Complete analysis finished!
-
-        All outputs saved to: saat-output/
-        - discovery.json
-        - architecture.json
-        - archchar-analysis.md (Score: 68/100)
-        - validation-report.json (Score: 85/100)
-        - security-report.json (Score: 71/100)
-        - docs/ (comprehensive documentation)
-        - infrastructure/ (Terraform IaC)
-
-        🎯 Next Steps:
-        1. Review archchar-analysis.md for critical gaps
-        2. Fix the 3 critical security issues
-        3. Run terraform apply to deploy
-```
-
-#### Evaluate Architecture Quality
-```
-You: /saat-analyze-characteristics
-
-Claude: I'll help you analyze your architecture against specified characteristics...
-
-        **What I'll analyze (14 characteristics):**
-        - Operational (7): Availability, Scalability, Performance, Security, etc.
-        - Structural (5): Maintainability, Testability, Deployability, etc.
-        - Cross-Cutting (2): Interoperability, Usability
-
-        What I need from you:
-        1. Path to your C4 model JSON file
-        2. Path to your architecture characteristics JSON file
-
-You: architecture.json and characteristics.json
-
-Claude: [Analyzes architecture]
-
-        ✅ Architecture Characteristics Analysis Complete!
-
-        📊 Overall Score: 72/100 (Mostly Compliant)
-
-        ❌ Critical Gaps (2):
-        1. Availability: No load balancer for critical services
-           → Implement active-active clustering with load balancing
-        2. Scalability: Missing auto-scaling configuration
-           → Configure Kubernetes HPA or AWS Auto Scaling Groups
-
-        ⚠️ High Priority Gaps (3):
-        1. Performance: No caching layer
-        2. Fault Tolerance: Single points of failure detected
-        3. Recoverability: Backup strategy incomplete
-
-        📝 Detailed reports saved:
-        - archchar-analysis.md (human-readable with recommendations)
-        - archchar-analysis.json (machine-readable results)
-```
-
-#### Brownfield Analysis
-```
-You: /saat-discover
-
-Claude: I'll help you discover the architecture from an existing codebase.
-        What I need: Path to repository to analyze
-
-You: /home/projects/payment-app
-
-Claude: [Analyzes codebase]
-        ✅ Discovery complete!
-
-        Found:
-        - 3 services (payment-api, auth-service, notification-service)
-        - Technologies: Node.js, PostgreSQL, Redis, RabbitMQ
-        - Pattern: Microservices with event-driven communication
-
-        Next: Run /saat-generate to create C4 model
-```
-
-### Benefits
-
-✅ **No memorization** - Don't need to remember CLI switches
-✅ **Conversational** - Claude guides you through each step
-✅ **Context-aware** - Provides examples and next steps
-✅ **Error-resistant** - Clear prompts reduce mistakes
-✅ **Discoverable** - Tab completion shows all commands
-✅ **Integrated** - Seamlessly uses MCP tools under the hood
-
-### How It Works
-
-1. **Type the command**: Just type `/saat-` and Claude Code will autocomplete
-2. **Follow the prompts**: Each command explains what it needs
-3. **Provide inputs**: Give file paths or configuration when asked
-4. **Get results**: Commands automatically call the right MCP tools and format results
-5. **Take action**: Claude suggests next steps based on results
-
-### Documentation
-
-For complete details on each command, see:
-- **[.claude/README.md](.claude/README.md)** - Complete slash commands guide
-- **[docs/AGENTS_QUICK_REFERENCE.md](docs/AGENTS_QUICK_REFERENCE.md)** - All agents overview
-- **[docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md](docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md)** - ArchChar detailed guide
-
-### Troubleshooting
-
-**Commands not showing up?**
-1. Check that SAAT MCP server is configured (see MCP Tools section below)
-2. Verify files are in `~/.claude/commands/` or `.claude/commands/`
-3. Restart Claude Code
-
-**Need help with a command?**
-- Type the command and Claude will guide you
-- Or ask: "What do I need to provide for /saat-analyze-characteristics?"
-
----
-
-## 🔌 MCP Tools
-
-SAAT provides a Model Context Protocol (MCP) server for seamless Claude Code integration. The slash commands (above) use these MCP tools under the hood to provide guided workflows.
-
-### Setup
-
-1. **Add to Claude Code config** (`~/.config/claude/config.json`):
-
+Add to `~/.config/claude/config.json`:
 ```json
 {
   "mcpServers": {
@@ -951,257 +242,347 @@ SAAT provides a Model Context Protocol (MCP) server for seamless Claude Code int
 }
 ```
 
-2. **Restart Claude Code**
+Then restart Claude Code.
 
-3. **Use SAAT tools in Claude Code**:
-
-```
-You: I have a PRD in docs/requirements.md. Design the complete architecture.
-
-Claude: I'll use SAAT to analyze your requirements and generate the architecture.
-[Uses discover_requirements tool]
-[Uses generate_c4_model tool]
-[Uses validate_model tool with PCI-DSS]
-[Uses security_scan tool]
-[Uses generate_terraform tool for AWS]
-
-I've created:
-- Complete C4 architecture model (3 systems, 8 containers, 15 components)
-- Validation report: 98/100 (2 minor warnings)
-- Security analysis: 3 recommendations
-- AWS Terraform configuration (ready to deploy)
-
-Would you like me to show you any specific part?
-```
-
-### Available MCP Tools
-
-- `discover_architecture` - Analyze repository
-- `discover_requirements` - Extract requirements from documents
-- `generate_c4_model` - Generate architecture model
-- `analyze_architecture_characteristics` ⭐ **NEW** - Evaluate architecture quality against 14 characteristics
-- `validate_model` - Validate against standards
-- `analyze_security` - Security analysis
-- `generate_documentation` - Create docs
-- `generate_terraform` - Infrastructure-as-code
-- `full_analysis` - Complete end-to-end workflow
-
-All tools use `auto_approve=True` for seamless integration.
-
-**Tip**: Use the slash commands (e.g., `/saat-analyze-characteristics`) for guided workflows, or call MCP tools directly for programmatic control.
-
----
-
-## 🎛️ Model Support
-
-SAAT supports multiple AI models via PydanticAI:
-
-### Anthropic Claude (Default)
+### Step 4: Verify Installation
 
 ```bash
-export ANTHROPIC_API_KEY="your-key"
-saat --model anthropic:claude-sonnet-4 analyze --path /repo
-# or
-saat --model anthropic:claude-opus-4 analyze --path /repo
-```
+# Check SAAT CLI
+saat --version
+saat info
 
-### OpenAI
-
-```bash
-export OPENAI_API_KEY="your-key"
-saat --model openai:gpt-4 analyze --path /repo
-# or
-saat --model openai:gpt-4-turbo analyze --path /repo
-```
-
-### Google Gemini
-
-```bash
-export GEMINI_API_KEY="your-key"
-saat --model gemini:gemini-1.5-pro analyze --path /repo
-```
-
-### Local Models (Ollama)
-
-```bash
-# Start Ollama
-ollama serve
-
-# Pull model
-ollama pull llama3.1
-
-# Use with SAAT
-saat --model ollama:llama3.1 analyze --path /repo
-```
-
-### Set Default Model
-
-```bash
-# Via environment variable
-export SAAT_MODEL="anthropic:claude-sonnet-4"
-
-# Via .env file
-echo "SAAT_MODEL=anthropic:claude-sonnet-4" >> .env
+# In Claude Code, type:
+# /saat-help
+# You should see all available commands
 ```
 
 ---
 
-## 💡 Examples
+## 📖 Usage Guides
 
-### Example 1: Brownfield - Analyze Payment App
+### For New Users: Start Here!
 
-```bash
-cd /my-payment-app
+**The Orchestrator** (`/saat-orchestrate`) is your starting point. It will:
+- Ask you what you want to do
+- Recommend which agents to run
+- Guide you through the entire process
+- Keep you updated on progress
+- Ask for help when it needs information
 
-# Analyze
-saat analyze --path . -o architecture.json
+### Detailed Step-by-Step Guides
 
-# Validate PCI-DSS compliance
-saat validate-model -m architecture.json -f PCI-DSS -o validation.json
+📘 **[Greenfield Guide](docs/GREENFIELD_GUIDE.md)** - Designing a new system from scratch
+- Extract requirements from documents
+- Generate architecture automatically
+- Evaluate quality before building
+- Generate deployment infrastructure
+- Complete walkthrough with examples
 
-# Security scan
-saat security-scan -m architecture.json --threat-model -o security.json
+📗 **[Brownfield Guide](docs/BROWNFIELD_GUIDE.md)** - Analyzing existing codebases
+- Discover architecture from code
+- Identify quality issues
+- Check compliance and security
+- Generate missing documentation
+- Create infrastructure-as-code
+- Complete walkthrough with examples
 
-# Generate AWS infrastructure with compliance
-saat generate-terraform -m architecture.json -p aws -o infrastructure/
-
-# Output:
-# ✅ architecture.json (C4 model)
-# ✅ validation.json (PCI-DSS compliance report)
-# ✅ security.json (Security issues + threat model)
-# ✅ infrastructure/ (Terraform with proper encryption, network isolation)
-```
-
-### Example 2: Greenfield - Design E-Commerce Platform
-
-```bash
-# Extract requirements
-saat discover-requirements \\
-  -f docs/product-requirements.md \\
-  -f docs/technical-constraints.md \\
-  -n "E-Commerce Platform" \\
-  -o requirements.json
-
-# Review extracted requirements
-cat requirements.json | python -m json.tool
-
-# Export for visual design (manual creation for now)
-# TODO: saat generate-from-requirements
-
-# Validate
-saat validate-model -m architecture.json -f GDPR
-
-# Generate complete stack
-saat generate-docs -m architecture.json -f markdown -f plantuml -o docs/
-saat generate-terraform -m architecture.json -p aws -o infrastructure/
-```
-
-### Example 3: Round-Trip with Visual Editor
-
-```bash
-# Start with code analysis
-saat analyze --path /my-microservices -o architecture.json
-
-# Export to Structurizr
-saat export-structurizr -m architecture.json -o structurizr.json
-
-# Edit in bac4-standalone
-# (Visual refinement, add missing systems, clarify relationships)
-
-# Import refined model
-saat import-structurizr -s structurizr-refined.json -o architecture-v2.json
-
-# Validate changes
-saat validate-model -m architecture-v2.json
-
-# Regenerate infrastructure with changes
-saat generate-terraform -m architecture-v2.json -p aws -o infrastructure-v2/
-```
-
-### Example 4: Full Automation
-
-```bash
-# Complete automated workflow
-saat -y analyze --path /repo -o architecture.json
-saat -y validate-model -m architecture.json -f PCI-DSS
-saat -y security-scan -m architecture.json --threat-model
-saat -y generate-docs -m architecture.json -f markdown -f plantuml
-saat -y generate-terraform -m architecture.json -p aws
-
-# All tasks run without prompts
-```
+📙 **[Customization Guide](docs/CUSTOMIZATION_GUIDE.md)** - Tailor SAAT to your needs
+- Customize agent behavior
+- Add custom validation rules
+- Create custom architecture characteristics
+- Extend with your own patterns
+- Build custom agents
 
 ---
 
-## 🏛️ Architecture
+## 🧠 Core Concepts
 
+### The 9 Agents
+
+SAAT uses specialized AI agents, each expert in one area:
+
+1. **🎯 Orchestrator Agent** ⭐ **NEW** - Coordinates all other agents, creates plans, guides users
+2. **🔍 Discovery Agent** - Analyzes codebases to discover architecture
+3. **📋 Requirements Agent** - Extracts requirements from documents
+4. **🏗️ Generator Agent** - Creates C4 architecture models
+5. **📊 Architecture Characteristics Agent** - Evaluates quality against 14 standards
+6. **✅ Validation Agent** - Validates compliance (PCI-DSS, HIPAA, GDPR, SOC2)
+7. **🔒 Security Agent** - Analyzes security and creates threat models
+8. **📚 Documentation Agent** - Generates docs (Markdown, PlantUML, Mermaid, ADRs)
+9. **🏗️ Terraform Agent** - Creates infrastructure-as-code
+
+### The C4 Model
+
+SAAT uses the [C4 model](https://c4model.com) for architecture:
+
+- **Level 1 - System Context**: High-level view of systems and external dependencies
+- **Level 2 - Container**: Applications, databases, microservices
+- **Level 3 - Component**: Code-level modules and services
+
+### Architecture Characteristics
+
+SAAT evaluates architecture against 14 standard characteristics from Mark Richards:
+
+**Operational (7)**: Availability, Scalability, Performance, Security, Reliability, Fault Tolerance, Recoverability
+
+**Structural (5)**: Maintainability, Testability, Deployability, Configurability, Extensibility
+
+**Cross-Cutting (2)**: Interoperability, Usability
+
+Each characteristic gets:
+- **Score** (0-100)
+- **Status** (Fully Compliant, Mostly Compliant, Partially Compliant, Non-Compliant)
+- **Gap Analysis** with severity levels (critical, high, medium, low)
+- **Recommendations** with implementation steps
+
+### Criticality Levels
+
+SAAT assigns criticality to guide infrastructure decisions:
+
+| Level | Uptime | Infrastructure | Use Case |
+|-------|--------|---------------|----------|
+| **CS1** | 99.99% | Multi-AZ, auto-scaling 2-10, 35d backups | Mission critical (payments, auth) |
+| **CS2** | 99.9% | Multi-AZ, auto-scaling 2-5, 7d backups | Business critical (APIs, databases) |
+| **SL1** | 99.5% | Single-AZ, basic monitoring, 3d backups | Standard services |
+| **SL2** | 99% | Single-AZ, minimal config, 3d backups | Internal tools |
+| **STANDARD** | Best effort | Minimal, no backups | Development, testing |
+
+---
+
+## 🤖 Available Agents
+
+### 1. 🎯 Orchestrator Agent ⭐ **NEW**
+
+**Purpose**: Your AI architecture consultant that coordinates all other agents
+
+The Orchestrator Agent is your primary interface to SAAT. It:
+- **Understands your goals** through conversation
+- **Recommends what to do** based on your situation
+- **Creates a plan** and gets your approval
+- **Coordinates agents** to execute the plan
+- **Keeps you updated** with progress reports
+- **Asks for help** when it needs documentation or clarification
+
+**Usage**:
 ```
-SAAT/
-├── saat/
-│   ├── models.py              # Pydantic models (C4, Requirements, Checklists)
-│   ├── structurizr.py         # Structurizr JSON models
-│   ├── converters.py          # SAAT ↔ Structurizr conversion
-│   ├── cli.py                 # Click CLI (13+ commands)
-│   ├── client.py              # High-level API
-│   ├── broker.py              # Agent orchestration
-│   ├── agents/
-│   │   ├── base.py            # BaseAgentWithChecklist
-│   │   ├── discovery.py       # Code analysis (brownfield)
-│   │   ├── generator.py       # C4 model generation
-│   │   ├── requirements.py    # Requirements extraction (greenfield)
-│   │   ├── archchar.py        # Architecture characteristics analysis ⭐ NEW
-│   │   ├── validation.py      # Compliance validation
-│   │   ├── documentation.py   # Multi-format documentation
-│   │   ├── security.py        # Security analysis & threat modeling
-│   │   └── terraform.py       # Infrastructure-as-code generation
-├── saat_mcp_server.py         # Claude Code MCP server
-├── .claude/
-│   ├── commands/              # Slash commands for Claude Code CLI ⭐ NEW
-│   │   ├── saat-discover.md
-│   │   ├── saat-requirements.md
-│   │   ├── saat-generate.md
-│   │   ├── saat-analyze-characteristics.md
-│   │   ├── saat-validate.md
-│   │   ├── saat-security.md
-│   │   ├── saat-document.md
-│   │   ├── saat-terraform.md
-│   │   ├── saat-full-pipeline.md
-│   │   └── saat-help.md
-│   └── README.md              # Slash commands user guide
-├── install-claude-commands.sh # Installation script for slash commands
-├── docs/
-│   ├── AGENTS_QUICK_REFERENCE.md              # All agents overview ⭐ NEW
-│   ├── ARCHITECTURE_CHARACTERISTICS_USAGE.md  # ArchChar guide ⭐ NEW
-│   └── ARCHCHAR_INTEGRATION_ANALYSIS.md       # Integration analysis ⭐ NEW
-├── examples/
-│   ├── quick_start.py         # Brownfield example
-│   ├── greenfield_project.py  # Greenfield example
-│   └── requirements.md        # Sample PRD
-├── BAC4_INTEGRATION.md        # bac4-standalone integration guide
-└── README.md                  # This file
+/saat-orchestrate
 ```
+
+**Example Conversation**:
+```
+You: /saat-orchestrate
+
+Orchestrator: Hello! I'm your SAAT architecture consultant.
+              I'll help you with architecture discovery, design,
+              quality analysis, validation, and infrastructure.
+
+              What brings you here today?
+              1. I have an existing codebase I want to analyze
+              2. I want to design a new system
+              3. I have an architecture I want to review
+              4. I'm not sure - help me figure it out
+
+You: I want to analyze my existing payment processing application
+
+Orchestrator: Great! I'll help you analyze your payment app.
+
+              First, let me understand your situation:
+              - Where is the codebase? (path)
+              - Do you have any existing architecture docs?
+              - What are your main concerns? (security, performance, etc.)
+              - Any compliance requirements? (PCI-DSS, etc.)
+
+You: The code is in /app/payment-system, no existing docs,
+     I'm concerned about PCI-DSS compliance and security
+
+Orchestrator: Perfect! Based on what you've told me, here's my plan:
+
+              📋 Analysis Plan:
+              1. ✅ Discover architecture from /app/payment-system
+              2. ✅ Generate C4 model
+              3. ✅ Analyze architecture quality (14 characteristics)
+              4. ✅ Validate PCI-DSS compliance
+              5. ✅ Deep security analysis with threat modeling
+              6. ✅ Generate comprehensive documentation
+              7. ✅ Create infrastructure-as-code (if needed)
+
+              Estimated time: 5-10 minutes
+
+              Does this plan look good? (y/n)
+
+You: yes
+
+Orchestrator: Excellent! Starting analysis...
+
+              [1/7] 🔍 Discovering architecture...
+              Found: 3 services (payment-api, auth-service, notification-service)
+              Technologies: Node.js, PostgreSQL, Redis, RabbitMQ
+              Pattern: Microservices with event-driven communication
+              ✅ Discovery complete!
+
+              [2/7] 🏗️ Generating C4 model...
+              Created: 3 systems, 8 containers, 15 components
+              ✅ Model generated!
+
+              [3/7] 📊 Analyzing architecture quality...
+              Overall Score: 68/100 (Needs Improvement)
+              Critical Issues: 2 (Availability, Security)
+              ✅ Analysis complete!
+
+              [4/7] ✅ Validating PCI-DSS compliance...
+              Compliance Score: 72/100
+              ⚠️ Found 5 compliance issues
+              ✅ Validation complete!
+
+              [5/7] 🔒 Running security analysis...
+              🚨 CRITICAL: Unencrypted database connections
+              🚨 CRITICAL: Missing authentication on admin endpoints
+              ⚠️ HIGH: Weak password hashing (MD5)
+              ✅ Security scan complete!
+
+              [6/7] 📚 Generating documentation...
+              Created: README.md, architecture diagrams, ADRs
+              ✅ Documentation complete!
+
+              [7/7] 🏗️ Creating infrastructure code...
+              Generated: AWS Terraform with PCI-DSS configuration
+              ✅ Infrastructure code ready!
+
+
+              🎉 Analysis Complete!
+
+              📊 Summary:
+              - Quality: 68/100 (Needs Improvement)
+              - Compliance: 72/100 (PCI-DSS)
+              - Security: 🚨 2 CRITICAL, 1 HIGH, 3 MEDIUM issues
+
+              🚨 TOP PRIORITIES:
+              1. Fix unencrypted database connections (CRITICAL)
+              2. Add authentication to admin endpoints (CRITICAL)
+              3. Upgrade password hashing to bcrypt (HIGH)
+              4. Add load balancer for high availability
+              5. Implement auto-scaling
+
+              📁 Generated Files:
+              - architecture.json (C4 model)
+              - archchar-analysis.md (quality report)
+              - validation-report.json (PCI-DSS)
+              - security-report.json (threat model)
+              - docs/ (comprehensive documentation)
+              - infrastructure/ (Terraform)
+
+              What would you like to do next?
+              1. Review the security issues in detail
+              2. See recommendations for fixing availability
+              3. Deploy the infrastructure
+              4. Something else
+```
+
+**See**: [docs/ORCHESTRATOR_GUIDE.md](docs/ORCHESTRATOR_GUIDE.md) for complete guide.
+
+### 2-9. Specialized Agents
+
+The Orchestrator coordinates these specialized agents as needed:
+
+- **🔍 Discovery Agent** - Analyzes codebases (brownfield)
+- **📋 Requirements Agent** - Extracts requirements (greenfield)
+- **🏗️ Generator Agent** - Creates C4 models
+- **📊 Architecture Characteristics Agent** - Evaluates quality
+- **✅ Validation Agent** - Checks compliance
+- **🔒 Security Agent** - Analyzes security
+- **📚 Documentation Agent** - Generates docs
+- **🏗️ Terraform Agent** - Creates infrastructure
+
+Each agent has its own slash command if you want to use it directly:
+- `/saat-discover`
+- `/saat-requirements`
+- `/saat-generate`
+- `/saat-analyze-characteristics`
+- `/saat-validate`
+- `/saat-security`
+- `/saat-document`
+- `/saat-terraform`
+
+**For detailed documentation on each agent**, see:
+- [docs/AGENTS_QUICK_REFERENCE.md](docs/AGENTS_QUICK_REFERENCE.md) - All agents overview
+- [Appendix: Agent API Reference](#appendix-agent-api-reference) - Python API for each agent
 
 ---
 
 ## 📚 Documentation
 
-### Main Documentation
-- **[README.md](README.md)** - This complete user guide (you are here)
-- **[RELEASE_NOTES.md](RELEASE_NOTES.md)** - Release information
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history and planned features
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and design
+### Main Guides
+- **[README.md](README.md)** - This document (overview and quick start)
+- **[GREENFIELD_GUIDE.md](docs/GREENFIELD_GUIDE.md)** - Complete greenfield workflow
+- **[BROWNFIELD_GUIDE.md](docs/BROWNFIELD_GUIDE.md)** - Complete brownfield workflow
+- **[CUSTOMIZATION_GUIDE.md](docs/CUSTOMIZATION_GUIDE.md)** - How to customize SAAT
+
+### Agent Documentation
+- **[ORCHESTRATOR_GUIDE.md](docs/ORCHESTRATOR_GUIDE.md)** - Complete orchestrator guide
+- **[AGENTS_QUICK_REFERENCE.md](docs/AGENTS_QUICK_REFERENCE.md)** - All agents overview
+- **[ARCHITECTURE_CHARACTERISTICS_USAGE.md](docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md)** - Quality analysis guide
+- **[ARCHCHAR_INTEGRATION_ANALYSIS.md](docs/ARCHCHAR_INTEGRATION_ANALYSIS.md)** - Integration patterns
 
 ### Integration Guides
-- **[BAC4_INTEGRATION.md](BAC4_INTEGRATION.md)** - bac4-standalone integration guide
-- **[.claude/README.md](.claude/README.md)** - Claude Code slash commands guide ⭐ **NEW**
+- **[BAC4_INTEGRATION.md](BAC4_INTEGRATION.md)** - Visual editor integration
+- **[.claude/README.md](.claude/README.md)** - Slash commands reference
 
-### Agent Documentation ⭐ **NEW**
-- **[docs/AGENTS_QUICK_REFERENCE.md](docs/AGENTS_QUICK_REFERENCE.md)** - All agents overview and workflows
-- **[docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md](docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md)** - Complete ArchChar guide
-- **[docs/ARCHCHAR_INTEGRATION_ANALYSIS.md](docs/ARCHCHAR_INTEGRATION_ANALYSIS.md)** - Integration patterns and impact analysis
+### Technical Documentation
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - SAAT system architecture
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and roadmap
+- **[RELEASE_NOTES.md](RELEASE_NOTES.md)** - Release information
 
-### Examples
-- **[examples/](examples/)** - Working examples and sample files
+---
+
+## 💡 Examples
+
+### Example 1: Quick Architecture Review
+
+```
+You: /saat-orchestrate
+
+Orchestrator: What would you like to do?
+
+You: Quick review of my microservices app in ./services
+
+Orchestrator: [Runs discovery → generate → analyze → validate → security]
+
+              ✅ Quick Review Complete!
+
+              Quality: 75/100 (Good)
+              Top Issues:
+              1. No load balancer (availability: 60/100)
+              2. Missing auto-scaling (scalability: 65/100)
+              3. No caching layer (performance: 70/100)
+
+              Recommendation: Add these to improve to 90/100
+```
+
+### Example 2: Design Payment System
+
+```
+You: /saat-orchestrate
+
+You: Design a PCI-DSS compliant payment system
+
+Orchestrator: Do you have requirements docs?
+
+You: Yes, in docs/requirements.md
+
+Orchestrator: [Extracts requirements → generates architecture →
+              analyzes quality → validates PCI-DSS →
+              checks security → generates infrastructure]
+
+              ✅ Design Complete!
+
+              Your system:
+              - 3 systems, 8 containers, 15 components
+              - Quality: 88/100 (Excellent)
+              - PCI-DSS: 98/100 (Ready for certification)
+              - Infrastructure: AWS Terraform ready
+
+              You can deploy with: cd infrastructure && terraform apply
+```
 
 ---
 
@@ -1219,12 +600,7 @@ Contributions welcome! Please:
 git clone https://github.com/DavidROliverBA/SAAT.git
 cd SAAT
 pip install -e ".[dev]"
-# or
-poetry install
 ```
-
-### Future: Testing Suite
-Comprehensive testing suite planned for v1.2.0.
 
 ---
 
@@ -1238,16 +614,331 @@ MIT License - See [LICENSE](LICENSE) file
 
 - **PydanticAI** - Agent framework
 - **C4 Model** - Architecture visualization methodology
+- **Mark Richards** - Architecture characteristics methodology
 - **Structurizr** - JSON schema for C4 models
-- **bac4-standalone** - Visual C4 editor
-
----
-
-## 📞 Support
-
-- **Issues**: https://github.com/DavidROliverBA/SAAT/issues
-- **Discussions**: https://github.com/DavidROliverBA/SAAT/discussions
 
 ---
 
 **Built with ❤️ using PydanticAI**
+
+---
+
+## 📎 Appendix
+
+### Appendix A: CLI Reference
+
+For users who prefer command-line interface over conversational commands.
+
+#### Discovery & Generation
+```bash
+saat discover --path /repo --output discovery.json
+saat generate --discovery discovery.json --output architecture.json
+saat analyze --path /repo --output architecture.json  # Combined
+```
+
+#### Requirements (Greenfield)
+```bash
+saat discover-requirements \
+  -f docs/PRD.md \
+  -n "Project Name" \
+  -o requirements.json
+```
+
+#### Quality Analysis
+```bash
+saat analyze-characteristics \
+  -m architecture.json \
+  -c characteristics.json \
+  -o archchar-analysis
+```
+
+#### Validation
+```bash
+saat validate-model -m architecture.json -f PCI-DSS
+saat validate-model -m architecture.json -f HIPAA
+```
+
+#### Security
+```bash
+saat security-scan -m architecture.json --threat-model
+```
+
+#### Documentation
+```bash
+saat generate-docs \
+  -m architecture.json \
+  -f markdown -f plantuml -f mermaid \
+  -o docs/
+```
+
+#### Infrastructure
+```bash
+saat generate-terraform -m architecture.json -p aws -r us-east-1 -o infrastructure/
+```
+
+#### Global Options
+```bash
+# Auto-approve (skip prompts)
+saat -y validate-model -m architecture.json
+
+# Use different model
+saat --model openai:gpt-4 analyze --path /repo
+```
+
+**Full CLI documentation**: Run `saat --help` or `saat <command> --help`
+
+### Appendix B: MCP Tools Reference
+
+For developers integrating SAAT into other applications.
+
+Available MCP tools:
+- `orchestrate` - Start orchestrated workflow
+- `discover_architecture` - Analyze repository
+- `discover_requirements` - Extract requirements
+- `generate_c4_model` - Generate model
+- `analyze_architecture_characteristics` - Evaluate quality
+- `validate_model` - Validate compliance
+- `analyze_security` - Security analysis
+- `generate_documentation` - Create docs
+- `generate_terraform` - Infrastructure code
+- `full_analysis` - Complete workflow
+
+All tools use `auto_approve=True` for seamless integration.
+
+### Appendix C: Agent API Reference
+
+For Python developers using SAAT programmatically.
+
+#### Orchestrator Agent
+```python
+from saat.agents import OrchestratorAgent
+
+agent = OrchestratorAgent()
+result = await agent.orchestrate(
+    user_goal="Analyze my payment system",
+    context={
+        "codebase_path": "/app/payment",
+        "compliance": ["PCI-DSS"],
+        "concerns": ["security"]
+    },
+    auto_approve=False
+)
+```
+
+#### Discovery Agent
+```python
+from saat.agents import DiscoveryAgent
+
+agent = DiscoveryAgent()
+discovery = await agent.analyze_repository(
+    path="/path/to/repo",
+    max_depth=3,
+    auto_approve=False
+)
+```
+
+#### Generator Agent
+```python
+from saat.agents import GeneratorAgent
+
+agent = GeneratorAgent()
+model = await agent.generate_model(
+    discovery=discovery,
+    business_context=context,
+    auto_approve=False
+)
+```
+
+#### Requirements Agent
+```python
+from saat.agents import RequirementsAgent
+
+agent = RequirementsAgent()
+result = await agent.discover_requirements(
+    file_paths=["docs/PRD.md"],
+    project_name="Payment Platform",
+    auto_approve=False
+)
+```
+
+#### Architecture Characteristics Agent
+```python
+from saat.agents import ArchCharAgent
+
+agent = ArchCharAgent()
+result = await agent.analyze_architecture(
+    model=c4_model,
+    characteristics_input=archchar_input,
+    auto_approve=False
+)
+```
+
+#### Validation Agent
+```python
+from saat.agents import ValidationAgent
+
+agent = ValidationAgent()
+result = await agent.validate_model(
+    model=c4_model,
+    framework="PCI-DSS",
+    auto_approve=False
+)
+```
+
+#### Security Agent
+```python
+from saat.agents import SecurityAgent
+
+agent = SecurityAgent()
+result = await agent.analyze_security(
+    model=c4_model,
+    threat_model=True,
+    auto_approve=False
+)
+```
+
+#### Documentation Agent
+```python
+from saat.agents import DocumentationAgent
+
+agent = DocumentationAgent()
+result = await agent.generate_documentation(
+    model=c4_model,
+    output_dir="docs/",
+    formats=["markdown", "plantuml", "mermaid"],
+    auto_approve=False
+)
+```
+
+#### Terraform Agent
+```python
+from saat.agents import TerraformAgent
+
+agent = TerraformAgent()
+result = await agent.generate_terraform(
+    model=c4_model,
+    provider="aws",
+    region="us-east-1",
+    output_dir="infrastructure/",
+    auto_approve=False
+)
+```
+
+### Appendix D: Model Support
+
+SAAT supports multiple AI models:
+
+**Anthropic Claude** (Default)
+```bash
+export ANTHROPIC_API_KEY="your-key"
+saat --model anthropic:claude-sonnet-4 analyze --path /repo
+```
+
+**OpenAI**
+```bash
+export OPENAI_API_KEY="your-key"
+saat --model openai:gpt-4 analyze --path /repo
+```
+
+**Google Gemini**
+```bash
+export GEMINI_API_KEY="your-key"
+saat --model gemini:gemini-1.5-pro analyze --path /repo
+```
+
+**Local (Ollama)**
+```bash
+ollama serve
+ollama pull llama3.1
+saat --model ollama:llama3.1 analyze --path /repo
+```
+
+### Appendix E: Structurizr Integration
+
+SAAT integrates with [bac4-standalone](https://github.com/DavidROliverBA/bac4-standalone) for visual editing.
+
+```bash
+# Export to Structurizr format
+saat export-structurizr -m architecture.json -o structurizr.json
+
+# Import from Structurizr
+saat import-structurizr -s structurizr.json -o architecture.json
+```
+
+**See**: [BAC4_INTEGRATION.md](BAC4_INTEGRATION.md) for complete guide.
+
+### Appendix F: Future Roadmap - Agent Learning
+
+**🔮 Coming in v2.1+**: Agents that learn and improve over time
+
+#### Vision
+
+Each SAAT agent will gain experience from every analysis, building organizational knowledge:
+
+- **Pattern Recognition**: Learn common patterns in your codebases
+- **Recommendation Quality**: Improve suggestions based on what worked
+- **Domain Knowledge**: Build expertise in your specific industry/domain
+- **Team Preferences**: Learn your team's architecture preferences
+- **Historical Context**: Remember past decisions and their outcomes
+
+#### Research Areas
+
+We're researching best practices in agent learning:
+
+1. **Memory Systems**
+   - Vector databases for semantic memory (Pinecone, Weaviate)
+   - Graph databases for relationship memory (Neo4j)
+   - Time-series for evolution tracking
+
+2. **Feedback Loops**
+   - User feedback on recommendations (👍/👎)
+   - Outcome tracking (did the fix work?)
+   - A/B testing different approaches
+
+3. **Knowledge Transfer**
+   - Cross-project learning
+   - Industry best practices database
+   - Community-contributed patterns
+
+4. **Privacy-Preserving Learning**
+   - Local-only learning mode
+   - Federated learning for team knowledge
+   - Opt-in cloud knowledge sharing
+
+#### Implementation Plan
+
+**Phase 1**: Memory Storage (v2.1)
+- Store analysis history in local SQLite
+- Track patterns and decisions
+- Basic recommendation improvement
+
+**Phase 2**: Learning from Feedback (v2.2)
+- User feedback mechanism
+- Outcome tracking
+- Recommendation scoring
+
+**Phase 3**: Advanced Learning (v2.3)
+- Vector embeddings for pattern matching
+- Cross-project knowledge transfer
+- Community knowledge base (opt-in)
+
+**Phase 4**: Adaptive Agents (v3.0)
+- Agents that adapt to your organization
+- Personalized recommendations
+- Predictive architecture guidance
+
+#### Relevant Research
+
+- [MemGPT](https://arxiv.org/abs/2310.08560) - Virtual context management for LLMs
+- [Voyager](https://arxiv.org/abs/2305.16291) - Lifelong learning agents
+- [Reflexion](https://arxiv.org/abs/2303.11366) - Self-reflection for agents
+- [RAG Systems](https://arxiv.org/abs/2005.11401) - Retrieval-augmented generation
+
+**See**: [docs/AGENT_LEARNING.md](docs/AGENT_LEARNING.md) for detailed research and design (coming soon)
+
+---
+
+**📞 Support**
+
+- **Issues**: https://github.com/DavidROliverBA/SAAT/issues
+- **Discussions**: https://github.com/DavidROliverBA/SAAT/discussions
