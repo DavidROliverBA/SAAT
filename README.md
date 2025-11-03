@@ -1,8 +1,9 @@
 # SAAT - Solution Architecture Agent Toolkit
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-2.0.0-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/python-3.11+-green.svg" alt="Python">
+  <img src="https://img.shields.io/badge/agents-9-brightgreen.svg" alt="Agents">
   <img src="https://img.shields.io/badge/license-MIT-orange.svg" alt="License">
   <img src="https://img.shields.io/badge/status-production%20ready-success.svg" alt="Status">
 </p>
@@ -12,7 +13,7 @@
 </p>
 
 <p align="center">
-  Complete architecture toolkit: Analyze existing code, extract requirements, validate compliance, analyze security, generate documentation, and create infrastructure-as-code using specialized AI agents powered by PydanticAI
+  Complete architecture quality assurance platform: Discover architecture, evaluate against quality characteristics, validate compliance, analyze security, generate documentation, and create infrastructure-as-code using 9 specialized AI agents powered by PydanticAI
 </p>
 
 ---
@@ -21,6 +22,7 @@
 
 - [Overview](#-overview)
 - [Quick Start](#-quick-start)
+- [Claude Code Integration](#-claude-code-integration-slash-commands-new) ⭐ **NEW**
 - [Installation](#-installation)
 - [Core Concepts](#-core-concepts)
 - [Workflows](#-workflows)
@@ -29,7 +31,7 @@
 - [Available Agents](#-available-agents)
 - [CLI Commands](#-cli-commands)
 - [bac4-standalone Integration](#-bac4-standalone-visual-editor-integration)
-- [Claude Code Integration](#-claude-code-integration-mcp)
+- [MCP Tools](#-mcp-tools)
 - [Model Support](#-model-support)
 - [Examples](#-examples)
 - [Architecture](#-architecture)
@@ -43,6 +45,7 @@ SAAT is a **complete architecture toolkit** powered by PydanticAI that supports 
 - **Discover** architecture from existing codebases (brownfield)
 - **Extract** requirements from documents (greenfield)
 - **Generate** C4 models automatically
+- **Evaluate** architecture quality against 14 characteristics ⭐ **NEW**
 - **Validate** against compliance frameworks (PCI-DSS, HIPAA, GDPR, SOC2)
 - **Analyze** security posture and generate threat models
 - **Generate** comprehensive documentation (Markdown, PlantUML, Mermaid, ADRs)
@@ -51,13 +54,15 @@ SAAT is a **complete architecture toolkit** powered by PydanticAI that supports 
 
 ### Key Features
 
-✅ **7 Specialized AI Agents** - Each with checklist workflow and approval system
+✅ **9 Specialized AI Agents** - Each with checklist workflow and approval system
+✅ **Architecture Quality Analysis** ⭐ **NEW** - Evaluate against 14 characteristics (Mark Richards methodology)
+✅ **Claude Code Slash Commands** ⭐ **NEW** - Type `/saat-` for effortless usage
 ✅ **Brownfield & Greenfield** - Analyze existing code OR design from requirements
 ✅ **Structurizr JSON Standard** - Industry-standard format for C4 models
 ✅ **bac4-standalone Integration** - Visual editing with round-trip conversion
 ✅ **Human-in-the-Loop** - Interactive approval with auto-approve mode
 ✅ **Multi-Model Support** - Claude, GPT-4, Gemini, Ollama
-✅ **Claude Code MCP** - Seamless integration with Claude Code
+✅ **MCP Integration** - Seamless integration with Claude Code
 ✅ **Production Ready** - Retry logic, streaming, error handling
 ✅ **Type-Safe** - Pydantic models ensure correctness
 
@@ -471,6 +476,63 @@ result = await agent.generate_terraform(
 # - Backups (35d for CS1, 7d for CS2, 3d for SL1/SL2)
 ```
 
+### 8. Architecture Characteristics Agent ⭐ **NEW**
+**Purpose**: Evaluate architecture quality against 14 standard characteristics (Mark Richards methodology)
+
+```python
+from saat.agents import ArchCharAgent
+
+agent = ArchCharAgent()
+result = await agent.analyze_architecture(
+    model=c4_model,
+    characteristics_input=archchar_input,  # from ArchCharCapture
+    auto_approve=False
+)
+
+# Analyzes:
+# - Operational (7): Availability, Scalability, Performance, Security,
+#                    Reliability, Fault Tolerance, Recoverability
+# - Structural (5): Maintainability, Testability, Deployability,
+#                   Configurability, Extensibility
+# - Cross-Cutting (2): Interoperability, Usability
+#
+# Provides:
+# - Overall quality score (0-100, weighted by importance)
+# - Per-characteristic scores and compliance status
+# - Critical and high-priority gaps with severity levels
+# - Pattern-based recommendations with implementation steps
+# - Technology suggestions and effort estimates
+# - Detailed reports (Markdown + JSON)
+```
+
+**CLI Usage**:
+```bash
+# Analyze architecture quality
+saat analyze-characteristics \
+  -m architecture.json \
+  -c characteristics.json \
+  -o archchar-analysis
+
+# Or use the slash command for guided workflow
+# /saat-analyze-characteristics
+```
+
+**Output Example**:
+```
+Overall Score: 72/100 (Mostly Compliant)
+
+Critical Gaps (2):
+  - Availability: No load balancer for critical services
+  - Scalability: Missing auto-scaling configuration
+
+Top Recommendations:
+  1. Implement active-active clustering with load balancing
+  2. Configure Kubernetes HPA for auto-scaling
+  3. Add Redis caching layer for performance
+```
+
+**See**: [docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md](docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md) for complete guide.
+
 ---
 
 ## 🖥️ CLI Commands
@@ -509,6 +571,23 @@ saat validate-model -m architecture.json -o validation-report.json
 saat validate-model -m architecture.json -f PCI-DSS
 saat validate-model -m architecture.json -f HIPAA
 saat validate-model -m architecture.json -f GDPR
+```
+
+### Architecture Characteristics ⭐ **NEW**
+
+```bash
+# Analyze architecture quality against 14 standard characteristics
+saat analyze-characteristics \
+  -m architecture.json \
+  -c characteristics.json \
+  -o archchar-analysis
+
+# Output includes:
+# - archchar-analysis.md (detailed report with recommendations)
+# - archchar-analysis.json (machine-readable results)
+
+# Or use the slash command for guided workflow:
+# /saat-analyze-characteristics
 ```
 
 ### Security
@@ -642,9 +721,217 @@ SAAT's rich metadata (criticality levels, interfaces, responsibilities) is prese
 
 ---
 
-## 🔌 Claude Code Integration (MCP)
+## 🚀 Claude Code Integration (Slash Commands) ⭐ **NEW**
 
-SAAT provides a Model Context Protocol (MCP) server for seamless Claude Code integration.
+SAAT now provides **slash commands** for Claude Code CLI, making architecture analysis as easy as typing `/saat-` and letting Claude guide you through the process!
+
+### Why Slash Commands?
+
+**Before (CLI)**: Remember complex switches and options
+```bash
+saat analyze-characteristics \
+  --model-file architecture.json \
+  --characteristics characteristics.json \
+  --output archchar-analysis \
+  --format both
+```
+
+**After (Slash Commands)**: Conversational, guided workflows
+```
+You: /saat-analyze-characteristics
+
+Claude: I'll help you analyze your architecture against specified characteristics...
+        What I need from you:
+        1. Path to your C4 model JSON file
+        2. Path to your architecture characteristics JSON file
+
+You: The model is in architecture.json and characteristics.json
+
+Claude: [Runs analysis using MCP tool]
+        ✅ Analysis complete!
+        Overall Score: 72/100 (Mostly Compliant)
+
+        Critical Gaps (2):
+        - Availability: No load balancer for critical services
+        - Scalability: Missing auto-scaling configuration
+
+        Full reports saved to:
+        - archchar-analysis.md
+        - archchar-analysis.json
+```
+
+### Installation
+
+#### Option 1: Automatic (Recommended)
+
+From the SAAT repository root:
+```bash
+./install-claude-commands.sh
+```
+
+This copies all slash command files to `~/.claude/commands/` making them available globally in Claude Code.
+
+#### Option 2: Manual Installation
+
+```bash
+# Copy to Claude Code's global commands directory
+cp -r .claude/commands/* ~/.claude/commands/
+```
+
+#### Option 3: Per-Project (No Installation Needed)
+
+The commands are already in `.claude/commands/` in this repository. When you run Claude Code from the SAAT directory, they're automatically available!
+
+### Available Commands
+
+Once installed, type `/saat` in Claude Code and press Tab to see all commands:
+
+#### Discovery & Requirements
+- `/saat-discover` - Analyze existing codebase (brownfield)
+- `/saat-requirements` - Extract requirements from documents (greenfield)
+
+#### Generation & Quality Analysis
+- `/saat-generate` - Create C4 architecture model from discovery or requirements
+- `/saat-analyze-characteristics` ⭐ **NEW** - Evaluate architecture against 14 quality characteristics
+- `/saat-validate` - Validate model structural correctness and compliance
+- `/saat-security` - Analyze security posture and identify vulnerabilities
+
+#### Documentation & Infrastructure
+- `/saat-document` - Generate comprehensive documentation (Markdown, PlantUML, Mermaid, ADRs)
+- `/saat-terraform` - Generate Terraform infrastructure-as-code for AWS/Azure/GCP
+
+#### Complete Workflows
+- `/saat-full-pipeline` - Run everything: discover → generate → analyze → validate → secure → document → deploy
+- `/saat-help` - Show all SAAT commands with examples
+
+### Example Workflows
+
+#### Quick Architecture Review
+```
+You: /saat-full-pipeline
+
+Claude: I'll run the complete SAAT architecture pipeline!
+        What I need: Path to repository to analyze
+
+You: Analyze the current directory
+
+Claude: [Runs discover → generate → analyze → validate → secure → document → deploy]
+        ✅ Complete analysis finished!
+
+        All outputs saved to: saat-output/
+        - discovery.json
+        - architecture.json
+        - archchar-analysis.md (Score: 68/100)
+        - validation-report.json (Score: 85/100)
+        - security-report.json (Score: 71/100)
+        - docs/ (comprehensive documentation)
+        - infrastructure/ (Terraform IaC)
+
+        🎯 Next Steps:
+        1. Review archchar-analysis.md for critical gaps
+        2. Fix the 3 critical security issues
+        3. Run terraform apply to deploy
+```
+
+#### Evaluate Architecture Quality
+```
+You: /saat-analyze-characteristics
+
+Claude: I'll help you analyze your architecture against specified characteristics...
+
+        **What I'll analyze (14 characteristics):**
+        - Operational (7): Availability, Scalability, Performance, Security, etc.
+        - Structural (5): Maintainability, Testability, Deployability, etc.
+        - Cross-Cutting (2): Interoperability, Usability
+
+        What I need from you:
+        1. Path to your C4 model JSON file
+        2. Path to your architecture characteristics JSON file
+
+You: architecture.json and characteristics.json
+
+Claude: [Analyzes architecture]
+
+        ✅ Architecture Characteristics Analysis Complete!
+
+        📊 Overall Score: 72/100 (Mostly Compliant)
+
+        ❌ Critical Gaps (2):
+        1. Availability: No load balancer for critical services
+           → Implement active-active clustering with load balancing
+        2. Scalability: Missing auto-scaling configuration
+           → Configure Kubernetes HPA or AWS Auto Scaling Groups
+
+        ⚠️ High Priority Gaps (3):
+        1. Performance: No caching layer
+        2. Fault Tolerance: Single points of failure detected
+        3. Recoverability: Backup strategy incomplete
+
+        📝 Detailed reports saved:
+        - archchar-analysis.md (human-readable with recommendations)
+        - archchar-analysis.json (machine-readable results)
+```
+
+#### Brownfield Analysis
+```
+You: /saat-discover
+
+Claude: I'll help you discover the architecture from an existing codebase.
+        What I need: Path to repository to analyze
+
+You: /home/projects/payment-app
+
+Claude: [Analyzes codebase]
+        ✅ Discovery complete!
+
+        Found:
+        - 3 services (payment-api, auth-service, notification-service)
+        - Technologies: Node.js, PostgreSQL, Redis, RabbitMQ
+        - Pattern: Microservices with event-driven communication
+
+        Next: Run /saat-generate to create C4 model
+```
+
+### Benefits
+
+✅ **No memorization** - Don't need to remember CLI switches
+✅ **Conversational** - Claude guides you through each step
+✅ **Context-aware** - Provides examples and next steps
+✅ **Error-resistant** - Clear prompts reduce mistakes
+✅ **Discoverable** - Tab completion shows all commands
+✅ **Integrated** - Seamlessly uses MCP tools under the hood
+
+### How It Works
+
+1. **Type the command**: Just type `/saat-` and Claude Code will autocomplete
+2. **Follow the prompts**: Each command explains what it needs
+3. **Provide inputs**: Give file paths or configuration when asked
+4. **Get results**: Commands automatically call the right MCP tools and format results
+5. **Take action**: Claude suggests next steps based on results
+
+### Documentation
+
+For complete details on each command, see:
+- **[.claude/README.md](.claude/README.md)** - Complete slash commands guide
+- **[docs/AGENTS_QUICK_REFERENCE.md](docs/AGENTS_QUICK_REFERENCE.md)** - All agents overview
+- **[docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md](docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md)** - ArchChar detailed guide
+
+### Troubleshooting
+
+**Commands not showing up?**
+1. Check that SAAT MCP server is configured (see MCP Tools section below)
+2. Verify files are in `~/.claude/commands/` or `.claude/commands/`
+3. Restart Claude Code
+
+**Need help with a command?**
+- Type the command and Claude will guide you
+- Or ask: "What do I need to provide for /saat-analyze-characteristics?"
+
+---
+
+## 🔌 MCP Tools
+
+SAAT provides a Model Context Protocol (MCP) server for seamless Claude Code integration. The slash commands (above) use these MCP tools under the hood to provide guided workflows.
 
 ### Setup
 
@@ -692,6 +979,7 @@ Would you like me to show you any specific part?
 - `discover_architecture` - Analyze repository
 - `discover_requirements` - Extract requirements from documents
 - `generate_c4_model` - Generate architecture model
+- `analyze_architecture_characteristics` ⭐ **NEW** - Evaluate architecture quality against 14 characteristics
 - `validate_model` - Validate against standards
 - `analyze_security` - Security analysis
 - `generate_documentation` - Create docs
@@ -699,6 +987,8 @@ Would you like me to show you any specific part?
 - `full_analysis` - Complete end-to-end workflow
 
 All tools use `auto_approve=True` for seamless integration.
+
+**Tip**: Use the slash commands (e.g., `/saat-analyze-characteristics`) for guided workflows, or call MCP tools directly for programmatic control.
 
 ---
 
@@ -851,7 +1141,7 @@ SAAT/
 │   ├── models.py              # Pydantic models (C4, Requirements, Checklists)
 │   ├── structurizr.py         # Structurizr JSON models
 │   ├── converters.py          # SAAT ↔ Structurizr conversion
-│   ├── cli.py                 # Click CLI (12 commands)
+│   ├── cli.py                 # Click CLI (13+ commands)
 │   ├── client.py              # High-level API
 │   ├── broker.py              # Agent orchestration
 │   ├── agents/
@@ -859,11 +1149,30 @@ SAAT/
 │   │   ├── discovery.py       # Code analysis (brownfield)
 │   │   ├── generator.py       # C4 model generation
 │   │   ├── requirements.py    # Requirements extraction (greenfield)
+│   │   ├── archchar.py        # Architecture characteristics analysis ⭐ NEW
 │   │   ├── validation.py      # Compliance validation
 │   │   ├── documentation.py   # Multi-format documentation
 │   │   ├── security.py        # Security analysis & threat modeling
 │   │   └── terraform.py       # Infrastructure-as-code generation
 ├── saat_mcp_server.py         # Claude Code MCP server
+├── .claude/
+│   ├── commands/              # Slash commands for Claude Code CLI ⭐ NEW
+│   │   ├── saat-discover.md
+│   │   ├── saat-requirements.md
+│   │   ├── saat-generate.md
+│   │   ├── saat-analyze-characteristics.md
+│   │   ├── saat-validate.md
+│   │   ├── saat-security.md
+│   │   ├── saat-document.md
+│   │   ├── saat-terraform.md
+│   │   ├── saat-full-pipeline.md
+│   │   └── saat-help.md
+│   └── README.md              # Slash commands user guide
+├── install-claude-commands.sh # Installation script for slash commands
+├── docs/
+│   ├── AGENTS_QUICK_REFERENCE.md              # All agents overview ⭐ NEW
+│   ├── ARCHITECTURE_CHARACTERISTICS_USAGE.md  # ArchChar guide ⭐ NEW
+│   └── ARCHCHAR_INTEGRATION_ANALYSIS.md       # Integration analysis ⭐ NEW
 ├── examples/
 │   ├── quick_start.py         # Brownfield example
 │   ├── greenfield_project.py  # Greenfield example
@@ -876,11 +1185,22 @@ SAAT/
 
 ## 📚 Documentation
 
+### Main Documentation
 - **[README.md](README.md)** - This complete user guide (you are here)
-- **[RELEASE_NOTES.md](RELEASE_NOTES.md)** - v1.0.0 release information
+- **[RELEASE_NOTES.md](RELEASE_NOTES.md)** - Release information
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and planned features
-- **[BAC4_INTEGRATION.md](BAC4_INTEGRATION.md)** - bac4-standalone integration guide
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and design
+
+### Integration Guides
+- **[BAC4_INTEGRATION.md](BAC4_INTEGRATION.md)** - bac4-standalone integration guide
+- **[.claude/README.md](.claude/README.md)** - Claude Code slash commands guide ⭐ **NEW**
+
+### Agent Documentation ⭐ **NEW**
+- **[docs/AGENTS_QUICK_REFERENCE.md](docs/AGENTS_QUICK_REFERENCE.md)** - All agents overview and workflows
+- **[docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md](docs/ARCHITECTURE_CHARACTERISTICS_USAGE.md)** - Complete ArchChar guide
+- **[docs/ARCHCHAR_INTEGRATION_ANALYSIS.md](docs/ARCHCHAR_INTEGRATION_ANALYSIS.md)** - Integration patterns and impact analysis
+
+### Examples
 - **[examples/](examples/)** - Working examples and sample files
 
 ---
