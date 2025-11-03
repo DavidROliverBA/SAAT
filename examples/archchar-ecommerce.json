@@ -1,0 +1,220 @@
+{
+  "projectName": "E-Commerce Platform",
+  "architect": "Architecture Team",
+  "date": "2025-10-31",
+  "notes": "High-scale e-commerce platform with international reach. Expecting significant growth in next 12 months.",
+  "characteristics": [
+    {
+      "id": "char_avail_001",
+      "name": "Availability",
+      "description": "The ability of a system to be accessible and operational when required.",
+      "selected": true,
+      "isTop": true,
+      "rating": "critical",
+      "notes": "99.99% uptime required per SLA. Must handle planned maintenance without downtime.",
+      "isCustom": false
+    },
+    {
+      "id": "char_scale_001",
+      "name": "Scalability",
+      "description": "The ability to handle increased workload by adding resources.",
+      "selected": true,
+      "isTop": true,
+      "rating": "critical",
+      "notes": "Must handle 10x traffic during Black Friday. Auto-scaling required.",
+      "isCustom": false
+    },
+    {
+      "id": "char_perf_001",
+      "name": "Performance",
+      "description": "The speed and efficiency of the system in executing tasks.",
+      "selected": true,
+      "isTop": true,
+      "rating": "high",
+      "notes": "Page load under 2s, checkout under 3s. P95 response time < 500ms.",
+      "isCustom": false
+    },
+    {
+      "id": "char_sec_001",
+      "name": "Security",
+      "description": "The ability to protect data and functionality from unauthorized access.",
+      "selected": true,
+      "isTop": true,
+      "rating": "critical",
+      "notes": "PCI-DSS compliance required for payment processing. GDPR for EU customers.",
+      "isCustom": false
+    },
+    {
+      "id": "char_rel_001",
+      "name": "Reliability",
+      "description": "The ability to function correctly and consistently over time.",
+      "selected": true,
+      "isTop": false,
+      "rating": "high",
+      "notes": "Order processing must be reliable. No lost transactions.",
+      "isCustom": false
+    },
+    {
+      "id": "char_maint_001",
+      "name": "Maintainability",
+      "description": "The ease with which a system can be modified, updated, or repaired.",
+      "selected": true,
+      "isTop": false,
+      "rating": "high",
+      "notes": "Need to support rapid feature development. Code quality is priority.",
+      "isCustom": false
+    },
+    {
+      "id": "char_test_001",
+      "name": "Testability",
+      "description": "The ease with which the system can be tested for defects.",
+      "selected": true,
+      "isTop": true,
+      "rating": "high",
+      "notes": "Automated testing required. 80% code coverage target.",
+      "isCustom": false
+    },
+    {
+      "id": "char_deploy_001",
+      "name": "Deployability",
+      "description": "The ease and frequency with which the system can be deployed.",
+      "selected": true,
+      "isTop": true,
+      "rating": "high",
+      "notes": "Multiple deployments per day. CI/CD pipeline essential.",
+      "isCustom": false
+    },
+    {
+      "id": "char_fault_001",
+      "name": "Fault Tolerance",
+      "description": "The ability to continue operating despite failures in components.",
+      "selected": true,
+      "isTop": true,
+      "rating": "critical",
+      "notes": "Single component failure should not bring down system. Circuit breakers needed.",
+      "isCustom": false
+    },
+    {
+      "id": "char_recov_001",
+      "name": "Recoverability",
+      "description": "The ability to restore functionality after a failure.",
+      "selected": true,
+      "isTop": false,
+      "rating": "high",
+      "notes": "RTO: 4 hours, RPO: 1 hour for critical data.",
+      "isCustom": false
+    },
+    {
+      "id": "char_interop_001",
+      "name": "Interoperability",
+      "description": "The ability to exchange data and interact with other systems.",
+      "selected": true,
+      "isTop": false,
+      "rating": "medium",
+      "notes": "Must integrate with payment gateway, shipping providers, and inventory systems.",
+      "isCustom": false
+    },
+    {
+      "id": "char_config_001",
+      "name": "Configurability",
+      "description": "The ease with which system behavior can be changed through configuration.",
+      "selected": true,
+      "isTop": false,
+      "rating": "medium",
+      "notes": "Feature flags for A/B testing. Environment-specific configurations.",
+      "isCustom": false
+    },
+    {
+      "id": "char_extend_001",
+      "name": "Extensibility",
+      "description": "The ease with which new functionality can be added.",
+      "selected": true,
+      "isTop": false,
+      "rating": "medium",
+      "notes": "Need to add new payment methods and shipping options regularly.",
+      "isCustom": false
+    },
+    {
+      "id": "char_usab_001",
+      "name": "Usability",
+      "description": "The ease of use and user experience of the system.",
+      "selected": true,
+      "isTop": false,
+      "rating": "high",
+      "notes": "Mobile-first design. Accessibility standards (WCAG 2.1 AA).",
+      "isCustom": false
+    }
+  ],
+  "topCharacteristics": [
+    {
+      "id": "char_avail_001",
+      "name": "Availability",
+      "description": "The ability of a system to be accessible and operational when required.",
+      "selected": true,
+      "isTop": true,
+      "rating": "critical",
+      "notes": "99.99% uptime required per SLA. Must handle planned maintenance without downtime.",
+      "isCustom": false
+    },
+    {
+      "id": "char_scale_001",
+      "name": "Scalability",
+      "description": "The ability to handle increased workload by adding resources.",
+      "selected": true,
+      "isTop": true,
+      "rating": "critical",
+      "notes": "Must handle 10x traffic during Black Friday. Auto-scaling required.",
+      "isCustom": false
+    },
+    {
+      "id": "char_perf_001",
+      "name": "Performance",
+      "description": "The speed and efficiency of the system in executing tasks.",
+      "selected": true,
+      "isTop": true,
+      "rating": "high",
+      "notes": "Page load under 2s, checkout under 3s. P95 response time < 500ms.",
+      "isCustom": false
+    },
+    {
+      "id": "char_sec_001",
+      "name": "Security",
+      "description": "The ability to protect data and functionality from unauthorized access.",
+      "selected": true,
+      "isTop": true,
+      "rating": "critical",
+      "notes": "PCI-DSS compliance required for payment processing. GDPR for EU customers.",
+      "isCustom": false
+    },
+    {
+      "id": "char_test_001",
+      "name": "Testability",
+      "description": "The ease with which the system can be tested for defects.",
+      "selected": true,
+      "isTop": true,
+      "rating": "high",
+      "notes": "Automated testing required. 80% code coverage target.",
+      "isCustom": false
+    },
+    {
+      "id": "char_deploy_001",
+      "name": "Deployability",
+      "description": "The ease and frequency with which the system can be deployed.",
+      "selected": true,
+      "isTop": true,
+      "rating": "high",
+      "notes": "Multiple deployments per day. CI/CD pipeline essential.",
+      "isCustom": false
+    },
+    {
+      "id": "char_fault_001",
+      "name": "Fault Tolerance",
+      "description": "The ability to continue operating despite failures in components.",
+      "selected": true,
+      "isTop": true,
+      "rating": "critical",
+      "notes": "Single component failure should not bring down system. Circuit breakers needed.",
+      "isCustom": false
+    }
+  ]
+}

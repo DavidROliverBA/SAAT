@@ -783,6 +783,130 @@ def import_structurizr(ctx: click.Context, structurizr_file: str, output: str) -
 
 
 @main.command()
+@click.option(
+    "--model-file",
+    "-m",
+    required=True,
+    type=click.Path(exists=True),
+    help="C4 model JSON file to analyze",
+)
+@click.option(
+    "--characteristics",
+    "-c",
+    required=True,
+    type=click.Path(exists=True),
+    help="ArchCharCapture JSON file with architecture characteristics",
+)
+@click.option(
+    "--output",
+    "-o",
+    default="archchar-analysis",
+    type=click.Path(),
+    help="Output file path (without extension)",
+)
+@click.option(
+    "--format",
+    "-f",
+    type=click.Choice(["markdown", "json", "both"], case_sensitive=False),
+    default="both",
+    help="Output format",
+)
+@click.pass_context
+def analyze_characteristics(
+    ctx: click.Context,
+    model_file: str,
+    characteristics: str,
+    output: str,
+    format: str,
+) -> None:
+    """Analyze C4 model against architecture characteristics.
+
+    Evaluates your C4 architecture model against specified architecture
+    characteristics using Mark Richards' methodology. Identifies gaps,
+    provides recommendations, and generates compliance scores.
+
+    Requires an ArchCharCapture JSON file (from https://github.com/DavidROliverBA/ArchCharCapture)
+    with your selected characteristics and their importance ratings.
+    """
+    click.echo("🔍 Analyzing architecture characteristics...")
+    click.echo(f"   C4 Model: {model_file}")
+    click.echo(f"   Characteristics: {characteristics}")
+
+    async def run_analysis() -> None:
+        from saat.converters_archchar import import_archchar_json
+        from saat.agents.archchar import (
+            ArchCharAnalysisAgent,
+            generate_markdown_report,
+            export_json_report,
+            save_report,
+        )
+
+        # Load C4 model
+        model_data = json.loads(Path(model_file).read_text())
+        c4_model = C4Model(**model_data)
+
+        # Load architecture characteristics
+        archchar_input = import_archchar_json(characteristics)
+
+        click.echo(f"\n📊 Analyzing {len([c for c in archchar_input.characteristics if c.selected])} selected characteristics...")
+        click.echo(f"   Top 7: {', '.join([c.name for c in archchar_input.topCharacteristics])}")
+
+        # Run analysis
+        agent = ArchCharAnalysisAgent(ctx.obj["model"])
+        result = await agent.analyze(
+            c4_model,
+            archchar_input,
+            auto_approve=ctx.obj["auto_approve"],
+        )
+
+        # Save reports based on format
+        output_path = Path(output)
+
+        if format in ["markdown", "both"]:
+            markdown_path = output_path.with_suffix(".md")
+            save_report(result, markdown_path, format="markdown")
+            click.echo(f"\n📄 Markdown report: {markdown_path}")
+
+        if format in ["json", "both"]:
+            json_path = output_path.with_suffix(".json")
+            save_report(result, json_path, format="json")
+            click.echo(f"📊 JSON report: {json_path}")
+
+        # Display summary
+        click.echo(f"\n✅ Analysis complete!")
+        click.echo(f"   Overall Score: {result.overall_score}/100")
+        click.echo(f"   Characteristics Analyzed: {result.characteristics_analyzed}")
+        click.echo(f"   Critical Gaps: {len(result.critical_gaps)}")
+        click.echo(f"   High Priority Gaps: {len(result.high_priority_gaps)}")
+        click.echo(f"   Top Recommendations: {len(result.top_recommendations)}")
+
+        if result.critical_gaps:
+            click.echo(f"\n⚠️  Critical gaps requiring immediate attention:")
+            for gap in result.critical_gaps[:3]:
+                click.echo(f"   - {gap.area}: {gap.issue}")
+            if len(result.critical_gaps) > 3:
+                click.echo(f"   ... and {len(result.critical_gaps) - 3} more")
+
+        if result.top_recommendations:
+            click.echo(f"\n💡 Top recommendations:")
+            for rec in result.top_recommendations[:3]:
+                click.echo(f"   - {rec.title} ({rec.priority} priority)")
+            if len(result.top_recommendations) > 3:
+                click.echo(f"   ... and {len(result.top_recommendations) - 3} more")
+
+        click.echo(f"\n📖 See full report for detailed analysis and implementation steps.")
+
+    try:
+        asyncio.run(run_analysis())
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        import traceback
+        if ctx.obj.get("verbose"):
+            traceback.print_exc()
+        sys.exit(1)
+
+
+@main.command()
 def info() -> None:
     """Display SAAT version and configuration information."""
     click.echo(f"SAAT v{__version__}")
